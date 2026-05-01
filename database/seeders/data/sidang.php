@@ -1,0 +1,126 @@
+<?php
+
+ // =====================
+        // PAKET AFTER SIDANG
+        // =====================
+        return [
+            [
+                'name'         => 'Paket A1',
+                'price'        => 150000,
+                'duration'     => 40,
+                'participants' => '1 orang sidang',
+                'features'     => '30 foto edit, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket A2',
+                'price'        => 250000,
+                'duration'     => 40,
+                'participants' => '1 orang sidang',
+                'features'     => 'All file foto edit, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket B1',
+                'price'        => 200000,
+                'duration'     => 60,
+                'participants' => '1 orang sidang',
+                'features'     => '40 foto edit premium, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket B2',
+                'price'        => 300000,
+                'duration'     => 60,
+                'participants' => '1 orang sidang',
+                'features'     => 'All file foto edit, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket C1',
+                'price'        => 250000,
+                'duration'     => 90,
+                'participants' => '1 orang sidang',
+                'features'     => '50 foto edit premium, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket C2',
+                'price'        => 350000,
+                'duration'     => 90,
+                'participants' => '1 orang sidang',
+                'features'     => 'All file foto edit, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket D1',
+                'price'        => 250000,
+                'duration'     => 60,
+                'participants' => '2 orang sidang',
+                'features'     => '40 foto edit premium, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket D2',
+                'price'        => 350000,
+                'duration'     => 60,
+                'participants' => '2 orang sidang',
+                'features'     => 'All file foto edit, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket E1',
+                'price'        => 300000,
+                'duration'     => 60,
+                'participants' => '3 orang sidang',
+                'features'     => '40 foto edit premium, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket E2',
+                'price'        => 300000,
+                'duration'     => 60,
+                'participants' => '3 orang sidang',
+                'features'     => '40 foto edit premium, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket F1',
+                'price'        => 450000,
+                'duration'     => 90,
+                'participants' => '4 orang sidang',
+                'features'     => '50 foto edit premium, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket F2',
+                'price'        => 550000,
+                'duration'     => 90,
+                'participants' => '4 orang sidang',
+                'features'     => 'All file foto edit, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket G1',
+                'price'        => 500000,
+                'duration'     => 90,
+                'participants' => '5 orang sidang',
+                'features'     => '50 foto edit premium, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket G2',
+                'price'        => 650000,
+                'duration'     => 90,
+                'participants' => '5 orang sidang',
+                'features'     => 'All file foto edit, all file mentahan, boleh sama teman (bukan sesama sidang), kirim via drive',
+            ],
+            [
+                'name'         => 'Paket Video Cinematic',
+                'price'        => 400000,
+                'duration'     => 60,
+                'participants' => '1 orang sidang',
+                'features'     => '1-3 menit video cinematic, konsep bisa request, kirim via drive',
+            ],
+            [
+                'name'         => 'Paket Foto & Video A1',
+                'price'        => 700000,
+                'duration'     => 90,
+                'participants' => '1 orang sidang',
+                'features'     => '40 foto edit, 1 menit video cinematic, kirim via drive',
+            ],
+            [
+                'name'         => 'Paket Foto & Video A2',
+                'price'        => 1000000,
+                'duration'     => 120,
+                'participants' => '1 orang sidang',
+                'features'     => '50 foto edit, 1-3 menit video cinematic, konsep bisa request, kirim via drive',
+            ],
+        ];
