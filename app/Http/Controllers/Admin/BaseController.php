@@ -39,14 +39,17 @@ class BaseController extends Controller
         $data['totalAdmin']    = User::where('role', 'admin')->count();
 
         // Statistik Order
-        $data['totalOrder']    = Order::count();
-        $data['orderPending']  = Order::where('status', 'pending')->count();
-        $data['orderProcess']  = Order::where('status', 'confirmed')->count();
-        $data['orderFinished'] = Order::where('status', 'completed')->count();
+        $data['totalOrder']     = Order::count();
+        $data['orderPending']   = Order::where('status', 'pending')->count();
+        $data['orderProcess']   = Order::where('status', 'confirmed')->count();
+        $data['orderFinished']  = Order::where('status', 'completed')->count();
 
-        // Pendapatan
-        $data['totalIncome'] = Order::where('status', 'completed')
-                                    ->sum('total_price');
+        // Stat Cards (nama sesuai dashboard.blade.php)
+        $data['pendingOrder']   = Order::where('status', 'pending')->count();
+        $data['completedOrder'] = Order::where('status', 'completed')->count();
+
+        // Pendapatan — gunakan Payment verified agar konsisten
+        $data['totalIncome'] = Payment::where('payment_status', 'verified')->sum('amount');
 
         // Payment
         $data['totalPayment'] = Payment::count();
@@ -58,8 +61,9 @@ class BaseController extends Controller
         $data['totalRating'] = Rating::count();
 
         // Data terbaru
-        $data['latestOrders'] = Order::with(['user', 'package'])
-                                    ->latest()->take(5)->get();
+        // FIX: nama variabel disamakan dengan yang dipanggil di blade ($latestOrder, bukan $latestOrders)
+        $data['latestOrder'] = Order::with(['user', 'package.category'])
+                                    ->latest()->take(10)->get();
 
         $data['latestPayment'] = Payment::with(['order.user'])
                                         ->latest()->take(5)->get();

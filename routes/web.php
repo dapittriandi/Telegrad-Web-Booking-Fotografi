@@ -89,7 +89,7 @@ Route::post('/register', [CustomerAuthController::class, 'register'])
 
 Route::post('/logout', [CustomerAuthController::class, 'logout'])
     ->name('customer.logout')->middleware('auth');
-    
+
 
 /*
 |--------------------------------------------------------------------------
@@ -114,37 +114,56 @@ Route::middleware('auth')->group(function () {
         ->name('customer.orders');
 
     // PENTING: route delivery HARUS di atas route detail
-    // agar /my-orders/5/delivery tidak ditangkap oleh {id}
     Route::get('/my-orders/{orderId}/delivery', [CustomerController::class, 'delivery'])
         ->name('customer.delivery');
 
     Route::get('/my-orders/{id}', [CustomerController::class, 'detail'])
         ->name('customer.orders.detail');
-    
+
     Route::get('/profile', [CustomerController::class, 'profile'])
         ->name('customer.profile');
- 
+
     Route::put('/profile/update', [CustomerController::class, 'profileUpdate'])
-            ->name('customer.profile.update');
+        ->name('customer.profile.update');
 
-    Route::post('/rating',            [\App\Http\Controllers\Customer\CustomerRatingController::class, 'store'])
+    Route::post('/rating', [\App\Http\Controllers\Customer\CustomerRatingController::class, 'store'])
         ->name('customer.rating.store');
-
 });
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN AUTH
+| ADMIN AUTH & PASSWORD RESET
 |--------------------------------------------------------------------------
 */
-Route::get('/admin/login', [AdminController::class, 'LoginForm'])
-    ->name('admin.login')->middleware('guest');
+Route::middleware('guest')->group(function () {
 
-Route::post('/admin/login', [AdminController::class, 'LoginPost'])
-    ->name('admin.login.post')->middleware('guest');
+    // Login
+    Route::get('/admin/login', [AdminController::class, 'LoginForm'])
+        ->name('admin.login');
 
+    Route::post('/admin/login', [AdminController::class, 'LoginPost'])
+        ->name('admin.login.post');
+
+    // Forgot Password — kirim email link
+    Route::post('/admin/forgot-password', [AdminController::class, 'forgotPasswordSend'])
+        ->name('admin.forgot-password.send');
+
+    // Reset Password — tampilkan form baru (via link di email)
+    // WAJIB nama 'password.reset' — ini yang dicari Laravel Password Broker
+    // saat generate link di email reset password
+    Route::get('/admin/reset-password/{token}', [AdminController::class, 'resetPasswordForm'])
+        ->name('password.reset');
+
+    // Reset Password — proses simpan password baru
+    Route::post('/admin/reset-password', [AdminController::class, 'resetPasswordUpdate'])
+        ->name('admin.reset-password.update');
+
+});
+
+// Logout (butuh auth)
 Route::post('/admin/logout', [AdminController::class, 'logout'])
-    ->name('admin.logout')->middleware('admin');
+    ->name('admin.logout')
+    ->middleware('admin');
 
 /*
 |--------------------------------------------------------------------------
@@ -162,11 +181,12 @@ Route::prefix('admin')
             ->name('admin.profile');
 
         Route::match(['POST', 'PUT'], '/profile/update', [AdminController::class, 'profileUpdate'])
-    ->name('admin.profile.update');
+            ->name('admin.profile.update');
 
         Route::resource('categories', CategoryController::class);
         Route::post('categories/{id}/toggle', [CategoryController::class, 'toggleStatus'])
-    ->name('categories.toggleStatus');
+            ->name('categories.toggleStatus');
+
         Route::resource('packages', PackageController::class);
         Route::resource('portfolios', PortfolioController::class);
         Route::resource('orders', AdminOrderController::class);
@@ -187,7 +207,6 @@ Route::prefix('admin')
         Route::resource('deliveries', DeliveryController::class);
         Route::get('/delivery', [DeliveryController::class, 'index'])
             ->name('admin.delivery.index');
-
 
         Route::resource('ratings', RatingController::class);
 

@@ -13,28 +13,50 @@ class AdminOrderController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | LIST SEMUA ORDER
+    | LIST SEMUA ORDER — dengan pagination & filter status
     |--------------------------------------------------------------------------
     */
-    public function index()
+    public function index(Request $request)
     {
-        $data['title'] = 'Manajemen Order';
-        $data['menu'] = 'Order';
-        $data['submenu'] = 'Daftar Order';
-        $data['subdesc'] = 'Kelola seluruh pesanan customer';
+        $web = WebSetting::latest()->first();
 
-        $data['web'] = WebSetting::latest()->first();
+        // ── Stat counts: query count langsung, TIDAK load semua data ──
+        $totalOrders    = Order::count();
+        $totalPending   = Order::where('status', 'pending')->count();
+        $totalConfirmed = Order::where('status', 'confirmed')->count();
+        $totalCompleted = Order::where('status', 'completed')->count();
+        $totalCancelled = Order::where('status', 'cancelled')->count();
 
-        $data['orders'] = Order::with([
-                'user',
-                'package',
-                'payment',
-                'delivery'
-            ])
-            ->latest()
-            ->get();
+        // ── Query utama: filter + search + pagination ──
+        $query = Order::with(['user', 'package.category', 'payment', 'delivery'])
+                      ->latest();
 
-        return view('admin.order.index', $data);
+        // Filter by status (dari tab filter blade)
+        $status = $request->input('status', 'all');
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        // Search by nama customer atau nama paket
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', fn($u) => $u->where('name', 'like', "%{$search}%")
+                                                   ->orWhere('email', 'like', "%{$search}%"))
+                  ->orWhereHas('package', fn($p) => $p->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        $orders = $query->paginate(15)->withQueryString();
+
+        return view('admin.order.index', compact(
+            'web',
+            'orders',
+            'totalOrders',
+            'totalPending',
+            'totalConfirmed',
+            'totalCompleted',
+            'totalCancelled'
+        ));
     }
 
     /*
@@ -44,76 +66,47 @@ class AdminOrderController extends Controller
     */
     public function show($id)
     {
-        $data['title'] = 'Detail Order';
-        $data['menu'] = 'Order';
-        $data['submenu'] = 'Detail Order';
-        $data['subdesc'] = 'Detail pesanan customer';
+        $web   = WebSetting::latest()->first();
+        $order = Order::with(['user', 'package.category', 'payment', 'delivery'])
+                      ->findOrFail($id);
 
-        $data['web'] = WebSetting::latest()->first();
-
-        $data['order'] = Order::with([
-                'user',
-                'package',
-                'payment',
-                'delivery'
-            ])
-            ->findOrFail($id);
-
-        return view('admin.order.detail', $data);
+        return view('admin.order.show', compact('web', 'order'));
     }
 
     /*
     |--------------------------------------------------------------------------
     | CONFIRM ORDER
     |--------------------------------------------------------------------------
-    | digunakan setelah payment verified
     */
     public function confirm($id)
     {
         $order = Order::findOrFail($id);
 
         if ($order->status !== 'pending') {
-            return back()->with(
-                'error',
-                'Order tidak bisa dikonfirmasi'
-            );
+            return back()->with('error', 'Order tidak bisa dikonfirmasi.');
         }
 
-        $order->update([
-            'status' => 'confirmed'
-        ]);
+        $order->update(['status' => 'confirmed']);
 
-        return back()->with(
-            'success',
-            'Order berhasil dikonfirmasi'
-        );
+        return back()->with('success', 'Order berhasil dikonfirmasi.');
     }
 
     /*
     |--------------------------------------------------------------------------
     | COMPLETE ORDER
     |--------------------------------------------------------------------------
-    | setelah sesi foto selesai
     */
     public function complete($id)
     {
         $order = Order::findOrFail($id);
 
         if ($order->status !== 'confirmed') {
-            return back()->with(
-                'error',
-                'Order belum bisa diselesaikan'
-            );
+            return back()->with('error', 'Order belum bisa diselesaikan.');
         }
 
-        $order->update([
-            'status' => 'completed'
-        ]);
+        $order->update(['status' => 'completed']);
 
-        return back()->with(
-            'success',
-            'Order berhasil diselesaikan'
-        );
+        return back()->with('success', 'Order berhasil diselesaikan.');
     }
 
     /*
@@ -126,20 +119,16 @@ class AdminOrderController extends Controller
         $order = Order::findOrFail($id);
 
         if ($order->status === 'completed') {
-            return back()->with(
-                'error',
-                'Order completed tidak bisa dibatalkan'
-            );
+            return back()->with('error', 'Order yang sudah selesai tidak bisa dibatalkan.');
         }
 
-        $order->update([
-            'status' => 'cancelled'
-        ]);
+        if ($order->status === 'cancelled') {
+            return back()->with('error', 'Order sudah berstatus dibatalkan.');
+        }
 
-        return back()->with(
-            'success',
-            'Order berhasil dibatalkan'
-        );
+        $order->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'Order berhasil dibatalkan.');
     }
 
     /*
@@ -150,12 +139,9 @@ class AdminOrderController extends Controller
     public function destroy($id)
     {
         $order = Order::findOrFail($id);
-
         $order->delete();
 
-        return back()->with(
-            'success',
-            'Order berhasil dihapus'
-        );
+        return redirect()->route('orders.index')
+                         ->with('success', 'Order berhasil dihapus.');
     }
 }

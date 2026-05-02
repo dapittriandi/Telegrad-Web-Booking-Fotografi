@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Str;
 use Alert;
 
 use App\Models\User;
@@ -55,7 +58,7 @@ class AdminController extends Controller
             'password' => $request->password,
         ];
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
 
             $user = Auth::user();
 
@@ -71,12 +74,14 @@ class AdminController extends Controller
                 return back();
             }
 
+            $request->session()->regenerate();
+
             Alert::success('Berhasil', 'Selamat datang, ' . $user->name . '!');
             return redirect()->route('admin.dashboard');
         }
 
         Alert::error('Gagal', 'Email/username atau password salah.');
-        return back();
+        return back()->withInput($request->only('login'));
     }
 
     /*
@@ -89,6 +94,109 @@ class AdminController extends Controller
         Auth::logout();
         Alert::success('Berhasil', 'Logout berhasil.');
         return redirect()->route('admin.login');
+    }
+
+    /*
+    |----------------------------------------
+    | FORGOT PASSWORD — Kirim link reset
+    |----------------------------------------
+    | Route: POST /admin/forgot-password
+    | Name:  admin.forgot-password.send
+    */
+    public function forgotPasswordSend(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        // Pastikan email adalah milik admin
+        $user = User::where('email', $request->email)
+                    ->where('role', 'admin')
+                    ->first();
+
+        if (!$user) {
+            // Pesan generik agar tidak bocorkan info user
+            return back()
+                ->with('fp_error', 'Email tidak terdaftar sebagai akun admin.')
+                ->withInput();
+        }
+
+        // Kirim link reset via Laravel Password Broker
+        $status = Password::sendResetLink(
+            ['email' => $request->email]
+        );
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return back()->with('fp_success',
+                'Link reset password telah dikirim ke ' . $request->email . '. Silakan cek inbox kamu.'
+            );
+        }
+
+        return back()
+            ->with('fp_error', 'Gagal mengirim email. Coba beberapa saat lagi.')
+            ->withInput();
+    }
+
+    /*
+    |----------------------------------------
+    | RESET PASSWORD — Tampilkan form baru
+    |----------------------------------------
+    | Route: GET /admin/reset-password/{token}
+    | Name:  admin.reset-password.form
+    */
+    public function resetPasswordForm(Request $request, string $token)
+    {
+        $data['title']   = 'Telegrad';
+        $data['menu']    = 'Admin';
+        $data['submenu'] = 'Reset Password';
+        $data['subdesc'] = 'Buat password baru untuk akun kamu';
+        $data['web']     = WebSetting::first();
+        $data['token']   = $token;
+        $data['email']   = $request->query('email', '');
+
+        return view('base.auth.auth-reset-password', $data);
+    }
+
+    /*
+    |----------------------------------------
+    | RESET PASSWORD — Proses simpan password baru
+    |----------------------------------------
+    | Route: POST /admin/reset-password
+    | Name:  admin.reset-password.update
+    */
+    public function resetPasswordUpdate(Request $request)
+    {
+        $request->validate([
+            'token'                 => ['required'],
+            'email'                 => ['required', 'email'],
+            'password'              => ['required', 'confirmed', 'min:8'],
+            'password_confirmation' => ['required'],
+        ], [
+            'password.min'       => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password'       => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()
+                ->route('admin.login')
+                ->with('success', 'Password berhasil direset! Silakan login dengan password baru kamu.');
+        }
+
+        return back()
+            ->withErrors(['email' => __($status)])
+            ->withInput($request->only('email'));
     }
 
     /*
@@ -125,9 +233,7 @@ class AdminController extends Controller
 
         $updateData = $request->only('name', 'username', 'email', 'phone');
 
-        // Handle photo upload
         if ($request->hasFile('photo')) {
-            // Hapus foto lama jika bukan default
             if ($user->photo && $user->photo !== 'default.jpg') {
                 Storage::disk('public')->delete('images/profile/' . $user->photo);
             }
@@ -135,8 +241,6 @@ class AdminController extends Controller
             $file     = $request->file('photo');
             $filename = time() . '_' . $file->getClientOriginalName();
             $file->storeAs('images/profile', $filename, 'public');
-            // File tersimpan di: storage/app/public/images/profile/{filename}
-            // Akses via:         asset('storage/images/profile/{filename}')
 
             $updateData['photo'] = $filename;
         }

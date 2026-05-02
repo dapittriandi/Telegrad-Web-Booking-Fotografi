@@ -1,24 +1,175 @@
 @extends('base.base-admin-index')
 
-@php $menu = 'Paket'; $submenu = 'Tambah Paket'; $subdesc = 'Buat paket foto baru'; @endphp
+@php
+    $menu    = 'Paket';
+    $submenu = 'Tambah Paket';
+    $subdesc = 'Buat paket foto baru';
+@endphp
 
 @section('custom-css')
 <style>
-    @font-face { font-family:"Font Awesome 6 Free"; font-weight:900; font-display:block; src:url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-solid-900.woff2") format("woff2"); }
-    .fa-solid,.fas{font-family:"Font Awesome 6 Free"!important;font-weight:900!important;}
+/* =============================================================
+   GLOBAL ICON FIX
+   ============================================================= */
+.bi {
+    font-family: "bootstrap-icons" !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
+}
 
-    .tg-card { border:none!important; border-radius:14px!important; box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05)!important; }
-    .tg-card .card-header { background:#fff!important; border-bottom:1px solid #F3F4F6!important; padding:15px 20px!important; }
-    .tg-card .card-header .card-title { font-size:.95rem!important; font-weight:700!important; color:#111827!important; margin:0; }
-    .tg-card .card-body { padding:20px!important; }
+/* =============================================================
+   SHARED
+   ============================================================= */
+.section-label {
+    font-size: .63rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em;
+    color: var(--tg-text-3); margin-bottom: 10px; display: block;
+}
+.tg-divider { height: 1px; background: var(--tg-border); margin: 18px 0; }
 
-    .section-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:#9CA3AF; margin-bottom:10px; }
-    .field-label { font-size:.8rem; font-weight:600; color:#374151; margin-bottom:5px; }
+/* =============================================================
+   PANEL CARD
+   ============================================================= */
+.panel-card {
+    background: var(--tg-glass);
+    backdrop-filter: var(--tg-blur);
+    border: 1px solid var(--tg-glass-border);
+    border-radius: 14px; overflow: hidden;
+    box-shadow: var(--tg-sh-sm);
+}
+.panel-head {
+    background: linear-gradient(135deg, #0A1628, #1E3A8A);
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; flex-wrap: wrap;
+}
+.panel-head h6 {
+    color: #fff; font-size: .92rem; font-weight: 700; margin: 0;
+    display: flex; align-items: center; gap: 8px; line-height: 1;
+}
+.panel-head h6 .bi { font-size: .9rem !important; }
+.panel-head-actions { display: flex; gap: 8px; align-items: center; }
+.panel-body { padding: 22px; }
 
-    .side-info-card { background:#F9FAFB; border-radius:12px; padding:16px; border:1px solid #F3F4F6; margin-bottom:12px; }
-    .side-info-card h6 { font-size:.8rem; font-weight:700; color:#374151; margin-bottom:12px; }
+/* =============================================================
+   FORM
+   ============================================================= */
+.field-label {
+    font-size: .78rem; font-weight: 700; color: var(--tg-text-2);
+    margin-bottom: 6px; display: block;
+}
+.field-label span { color: #EF4444; }
 
-    .features-hint { background:#EFF6FF; border-radius:8px; padding:10px 14px; border-left:3px solid #2563EB; font-size:.78rem; color:#1E40AF; margin-bottom:8px; }
+.tg-input {
+    background: var(--tg-bg-2, rgba(255,255,255,.06));
+    border: 1px solid var(--tg-border);
+    border-radius: 9px; padding: 9px 13px;
+    font-size: .84rem; width: 100%;
+    color: var(--tg-text);
+    transition: border-color .15s, box-shadow .15s;
+}
+.tg-input:focus {
+    border-color: #2563EB;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    outline: none;
+}
+.tg-input.is-invalid { border-color: #EF4444; }
+.tg-input::placeholder { color: var(--tg-text-3); }
+textarea.tg-input { resize: vertical; min-height: 90px; }
+select.tg-input { cursor: pointer; }
+
+.input-prefix-wrap, .input-suffix-wrap {
+    display: flex; align-items: stretch;
+}
+.input-prefix-wrap .tg-input { border-radius: 0 9px 9px 0; }
+.input-suffix-wrap .tg-input { border-radius: 9px 0 0 9px; }
+.input-affix {
+    display: flex; align-items: center; padding: 0 13px;
+    background: var(--tg-glass); border: 1px solid var(--tg-border);
+    font-size: .8rem; font-weight: 600; color: var(--tg-text-3);
+    white-space: nowrap; flex-shrink: 0;
+}
+.input-prefix-wrap .input-affix { border-right: none; border-radius: 9px 0 0 9px; }
+.input-suffix-wrap .input-affix { border-left: none; border-radius: 0 9px 9px 0; }
+
+.invalid-feedback { font-size: .74rem; color: #EF4444; margin-top: 4px; }
+
+/* Hint box */
+.field-hint {
+    background: rgba(37,99,235,.07);
+    border-left: 3px solid #2563EB;
+    border-radius: 0 8px 8px 0;
+    padding: 9px 13px; font-size: .78rem;
+    color: #2563EB; margin-bottom: 8px;
+    display: flex; align-items: flex-start; gap: 7px;
+}
+.field-hint .bi { margin-top: 1px; flex-shrink: 0; }
+
+/* Toggle wrap */
+.tg-toggle-wrap {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 13px;
+    background: var(--tg-glass);
+    border: 1px solid var(--tg-border);
+    border-radius: 9px;
+}
+.tg-toggle-wrap label { font-size: .84rem; color: var(--tg-text-2); cursor: pointer; margin: 0; }
+.tg-toggle-note { font-size: .72rem; color: var(--tg-text-3); margin-top: 6px; }
+
+/* =============================================================
+   BUTTONS
+   ============================================================= */
+.tg-btn {
+    border-radius: 9px; font-weight: 700; font-size: .82rem;
+    padding: 8px 15px; border: 1px solid transparent; cursor: pointer;
+    transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
+    line-height: 1; white-space: nowrap; text-decoration: none;
+}
+.tg-btn .bi { font-size: .8rem !important; }
+.tg-btn-sm { padding: 6px 13px; font-size: .78rem; border-radius: 8px; }
+.tg-btn-primary { background: #2563EB; color: #fff; border-color: #2563EB; }
+.tg-btn-primary:hover { background: #1D4ED8; border-color: #1D4ED8; color: #fff; }
+.tg-btn-w100 { width: 100%; justify-content: center; }
+.tg-btn-outline-back {
+    background: rgba(255,255,255,.12); color: rgba(255,255,255,.85);
+    border-color: rgba(255,255,255,.25);
+}
+.tg-btn-outline-back:hover { background: rgba(255,255,255,.22); color: #fff; }
+.tg-btn-save {
+    background: rgba(255,255,255,.15); color: #fff;
+    border-color: rgba(255,255,255,.3);
+}
+.tg-btn-save:hover { background: rgba(255,255,255,.25); color: #fff; }
+
+/* =============================================================
+   ALERT
+   ============================================================= */
+.tg-alert {
+    border-radius: 10px; padding: 11px 15px; font-size: .84rem;
+    margin-bottom: 18px; display: flex; align-items: flex-start; gap: 9px; font-weight: 500;
+}
+.tg-alert .bi { font-size: .95rem !important; flex-shrink: 0; margin-top: 1px; }
+.tg-alert-danger { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
+.tg-alert ul { margin: 6px 0 0; padding-left: 18px; }
+.tg-alert li { font-size: .82rem; }
+
+/* =============================================================
+   SIDE INFO
+   ============================================================= */
+.side-info {
+    background: var(--tg-glass);
+    border: 1px solid var(--tg-border);
+    border-radius: 10px; padding: 14px 16px;
+    margin-bottom: 0;
+}
+.side-info h6 {
+    font-size: .78rem; font-weight: 700; color: var(--tg-text-2);
+    margin-bottom: 12px; display: flex; align-items: center; gap: 7px;
+}
+.side-info h6 .bi { font-size: .85rem !important; }
 </style>
 @endsection
 
@@ -29,30 +180,32 @@
 
     <div class="row g-3">
 
-        {{-- Kolom Utama --}}
+        {{-- ── Kiri: Form Utama ── --}}
         <div class="col-lg-8">
-            <p class="section-label">Informasi Paket</p>
-            <div class="card tg-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title"><i class="fa-solid fa-camera me-2 text-primary"></i>Detail Paket</h5>
-                    <div class="d-flex gap-2">
-                        <a href="{{ route('packages.index') }}" class="btn btn-sm btn-outline-secondary" style="border-radius:8px;font-size:.78rem;">
-                            <i class="fa-solid fa-arrow-left me-1"></i> Kembali
+            <span class="section-label">Informasi Paket</span>
+            <div class="panel-card">
+                <div class="panel-head">
+                    <h6><i class="bi bi-camera"></i> Detail Paket Baru</h6>
+                    <div class="panel-head-actions">
+                        <a href="{{ route('packages.index') }}" class="tg-btn tg-btn-sm tg-btn-outline-back">
+                            <i class="bi bi-arrow-left"></i> Kembali
                         </a>
-                        <button type="submit" class="btn btn-sm btn-primary" style="border-radius:8px;font-size:.78rem;">
-                            <i class="fa-solid fa-save me-1"></i> Simpan Paket
+                        <button type="submit" class="tg-btn tg-btn-sm tg-btn-save">
+                            <i class="bi bi-save2"></i> Simpan Paket
                         </button>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="panel-body">
 
                     @if($errors->any())
-                    <div class="alert alert-danger mb-3" style="border-radius:10px;border:none;font-size:.84rem;">
-                        <i class="fa-solid fa-exclamation-circle me-1"></i>
-                        <strong>Ada kesalahan input:</strong>
-                        <ul class="mb-0 mt-1 ps-3">
-                            @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
-                        </ul>
+                    <div class="tg-alert tg-alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <div>
+                            <strong>Ada kesalahan input:</strong>
+                            <ul>
+                                @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+                            </ul>
+                        </div>
                     </div>
                     @endif
 
@@ -60,8 +213,9 @@
 
                         {{-- Nama --}}
                         <div class="col-12">
-                            <label class="field-label">Nama Paket <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
+                            <label class="field-label">Nama Paket <span>*</span></label>
+                            <input type="text" name="name"
+                                   class="tg-input @error('name') is-invalid @enderror"
                                    placeholder="Contoh: Paket Wisuda Personal A"
                                    value="{{ old('name') }}">
                             @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -69,11 +223,13 @@
 
                         {{-- Kategori --}}
                         <div class="col-lg-6">
-                            <label class="field-label">Kategori <span class="text-danger">*</span></label>
-                            <select name="category_id" class="form-select @error('category_id') is-invalid @enderror">
+                            <label class="field-label">Kategori <span>*</span></label>
+                            <select name="category_id"
+                                    class="tg-input @error('category_id') is-invalid @enderror">
                                 <option value="" disabled selected>Pilih kategori...</option>
                                 @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
+                                <option value="{{ $cat->id }}"
+                                    {{ old('category_id') == $cat->id ? 'selected' : '' }}>
                                     {{ $cat->name }}
                                 </option>
                                 @endforeach
@@ -83,30 +239,35 @@
 
                         {{-- Harga --}}
                         <div class="col-lg-6">
-                            <label class="field-label">Harga (Rp) <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white" style="font-size:.82rem;color:#6B7280;">Rp</span>
-                                <input type="number" name="price" class="form-control @error('price') is-invalid @enderror"
-                                       placeholder="250000" min="0" value="{{ old('price') }}">
+                            <label class="field-label">Harga <span>*</span></label>
+                            <div class="input-prefix-wrap">
+                                <span class="input-affix">Rp</span>
+                                <input type="number" name="price"
+                                       class="tg-input @error('price') is-invalid @enderror"
+                                       placeholder="250000" min="0"
+                                       value="{{ old('price') }}">
                             </div>
-                            @error('price')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            @error('price')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
                         {{-- Durasi --}}
                         <div class="col-lg-6">
-                            <label class="field-label">Durasi (menit) <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <input type="number" name="duration" class="form-control @error('duration') is-invalid @enderror"
-                                       placeholder="60" min="1" value="{{ old('duration') }}">
-                                <span class="input-group-text bg-white" style="font-size:.82rem;color:#6B7280;">menit</span>
+                            <label class="field-label">Durasi <span>*</span></label>
+                            <div class="input-suffix-wrap">
+                                <input type="number" name="duration"
+                                       class="tg-input @error('duration') is-invalid @enderror"
+                                       placeholder="60" min="1"
+                                       value="{{ old('duration') }}">
+                                <span class="input-affix">menit</span>
                             </div>
-                            @error('duration')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            @error('duration')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
                         {{-- Peserta --}}
                         <div class="col-lg-6">
-                            <label class="field-label">Keterangan Peserta <span class="text-danger">*</span></label>
-                            <input type="text" name="participants" class="form-control @error('participants') is-invalid @enderror"
+                            <label class="field-label">Keterangan Peserta <span>*</span></label>
+                            <input type="text" name="participants"
+                                   class="tg-input @error('participants') is-invalid @enderror"
                                    placeholder="Contoh: Personal (1 orang)"
                                    value="{{ old('participants') }}">
                             @error('participants')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -115,12 +276,13 @@
                         {{-- Fitur --}}
                         <div class="col-12">
                             <label class="field-label">Fitur Paket</label>
-                            <div class="features-hint">
-                                <i class="fa-solid fa-circle-info me-1"></i>
+                            <div class="field-hint">
+                                <i class="bi bi-info-circle-fill"></i>
                                 Pisahkan setiap fitur dengan Enter. Contoh: <em>30 foto edit, All file mentahan via drive</em>
                             </div>
-                            <textarea name="features" class="form-control @error('features') is-invalid @enderror"
-                                      rows="6"
+                            <textarea name="features"
+                                      class="tg-input @error('features') is-invalid @enderror"
+                                      rows="7"
                                       placeholder="Foto sepuasnya selama sesi&#10;30 foto edit&#10;All file mentahan kirim via drive&#10;Free revisi 1x">{{ old('features') }}</textarea>
                             @error('features')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
@@ -130,60 +292,65 @@
             </div>
         </div>
 
-        {{-- Kolom Kanan --}}
+        {{-- ── Kanan: Pengaturan ── --}}
         <div class="col-lg-4">
-            <p class="section-label">Pengaturan</p>
+            <span class="section-label">Pengaturan</span>
 
-            {{-- Peserta --}}
-            <div class="card tg-card mb-3">
-                <div class="card-header">
-                    <h5 class="card-title"><i class="fa-solid fa-users me-2" style="color:#2563EB;"></i>Batas Peserta</h5>
+            {{-- Batas Peserta --}}
+            <div class="panel-card mb-3">
+                <div class="panel-head">
+                    <h6><i class="bi bi-people"></i> Batas Peserta</h6>
                 </div>
-                <div class="card-body">
+                <div class="panel-body">
                     <div class="row g-3">
                         <div class="col-6">
                             <label class="field-label">Min. Peserta</label>
-                            <input type="number" name="min_participants" class="form-control @error('min_participants') is-invalid @enderror"
+                            <input type="number" name="min_participants"
+                                   class="tg-input @error('min_participants') is-invalid @enderror"
                                    value="{{ old('min_participants', 1) }}" min="1">
                             @error('min_participants')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-6">
                             <label class="field-label">Maks. Peserta</label>
-                            <input type="number" name="max_participants" class="form-control @error('max_participants') is-invalid @enderror"
-                                   placeholder="—" min="1" value="{{ old('max_participants') }}">
+                            <input type="number" name="max_participants"
+                                   class="tg-input @error('max_participants') is-invalid @enderror"
+                                   placeholder="—" min="1"
+                                   value="{{ old('max_participants') }}">
                             @error('max_participants')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-12">
                             <input type="hidden" name="unlimited_participants" value="0">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" name="unlimited_participants"
-                                       id="unlimited" value="1" {{ old('unlimited_participants') == '1' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="unlimited" style="font-size:.82rem;">Peserta tidak terbatas</label>
+                            <div class="tg-toggle-wrap">
+                                <input class="form-check-input" type="checkbox"
+                                       name="unlimited_participants"
+                                       id="unlimited" value="1"
+                                       {{ old('unlimited_participants') == '1' ? 'checked' : '' }}>
+                                <label for="unlimited">Peserta tidak terbatas</label>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Status --}}
-            <div class="card tg-card">
-                <div class="card-header">
-                    <h5 class="card-title"><i class="fa-solid fa-toggle-on me-2" style="color:#059669;"></i>Status Paket</h5>
+            {{-- Status Paket --}}
+            <div class="panel-card">
+                <div class="panel-head">
+                    <h6><i class="bi bi-toggles"></i> Status Paket</h6>
                 </div>
-                <div class="card-body">
+                <div class="panel-body">
                     <input type="hidden" name="is_active" value="0">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="is_active" id="is_active"
-                               value="1" {{ old('is_active', '1') == '1' ? 'checked' : '' }}>
-                        <label class="form-check-label" for="is_active" style="font-size:.84rem;font-weight:600;">
-                            Paket aktif & tampil di website
+                    <div class="tg-toggle-wrap">
+                        <input class="form-check-input" type="checkbox"
+                               name="is_active" id="is_active" value="1"
+                               {{ old('is_active', '1') == '1' ? 'checked' : '' }}>
+                        <label for="is_active" style="font-weight:700;">
+                            Paket aktif &amp; tampil di website
                         </label>
                     </div>
-                    <p style="font-size:.76rem;color:#9CA3AF;margin-top:8px;margin-bottom:0;">
-                        Paket non-aktif tidak bisa dipesan oleh customer.
-                    </p>
+                    <p class="tg-toggle-note">Paket non-aktif tidak bisa dipesan oleh customer.</p>
                 </div>
             </div>
+
         </div>
 
     </div>

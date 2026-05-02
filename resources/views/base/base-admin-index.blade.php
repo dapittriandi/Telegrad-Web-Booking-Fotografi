@@ -985,7 +985,7 @@
 
                     {{-- Brand --}}
                     <a href="{{ route('admin.dashboard') }}" class="tg-brand-wrap">
-                        <div class="tg-brand-icon">TG</div>
+                        <!-- <div class="tg-brand-icon">TG</div> -->
                         <span class="tg-brand-text">
                             <span class="tele">Tele</span><span class="grad">grad</span>
                         </span>
