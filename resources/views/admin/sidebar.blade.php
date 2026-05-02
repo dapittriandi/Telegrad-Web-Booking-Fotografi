@@ -1,4 +1,4 @@
-<ul class="menu">
+<ul class="menu" style="padding: 6px 0; list-style: none; margin: 0;">
 
     {{-- ── Menu Utama ── --}}
     <li class="sidebar-title">Menu Utama</li>
@@ -13,7 +13,7 @@
     <li class="sidebar-item {{ Route::is('admin.profile') ? 'active' : '' }}">
         <a href="{{ route('admin.profile') }}" class="sidebar-link">
             <i class="fa-solid fa-circle-user"></i>
-            <span>Edit Profile</span>
+            <span>Edit Profil</span>
         </a>
     </li>
 
@@ -22,7 +22,7 @@
 
     <li class="sidebar-item {{ Route::is('categories.*') ? 'active' : '' }}">
         <a href="{{ route('categories.index') }}" class="sidebar-link">
-            <i class="fa-solid fa-folder-open"></i>
+            <i class="fa-solid fa-layer-group"></i>
             <span>Kategori</span>
         </a>
     </li>

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? config('app.name', 'Telegrad') }}</title>
 
+    <link rel="icon" href="{{ asset('storage/images/logo_header/logo_telegrad_gold.png') }}" type="image/png">
+
+
     <!-- Fonts: Playfair Display + DM Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

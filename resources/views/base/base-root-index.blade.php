@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark light">
     <title>{{ isset($title) ? $title . ' — ' : '' }}{{ $web->site_name ?? config('app.name', 'Telegrad') }}</title>
     <meta name="description" content="{{ $web->site_description ?? 'Jasa foto & video wisuda profesional di Jambi' }}">
+
+<link rel="icon" href="{{ asset('images/logo_telegrad_gold.png') }}" type="image/png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,6 +49,10 @@
             --nav-border:    rgba(255,255,255,0.07);
             --footer-bg:     #0e0f11;
 
+            /* Bottom nav */
+            --bottom-nav-bg: rgba(14,15,17,0.96);
+            --bottom-nav-border: rgba(255,255,255,0.08);
+
             --shadow-sm:     0 4px 16px rgba(0,0,0,0.3);
             --shadow-md:     0 12px 40px rgba(0,0,0,0.45);
             --shadow-lg:     0 24px 64px rgba(0,0,0,0.55);
@@ -80,6 +87,10 @@
             --nav-border:    rgba(0,0,0,0.08);
             --footer-bg:     #1a1814;
 
+            /* Bottom nav */
+            --bottom-nav-bg: rgba(255,255,255,0.97);
+            --bottom-nav-border: rgba(0,0,0,0.10);
+
             --shadow-sm:     0 4px 16px rgba(0,0,0,0.08);
             --shadow-md:     0 12px 40px rgba(0,0,0,0.12);
             --shadow-lg:     0 24px 64px rgba(0,0,0,0.15);
@@ -91,7 +102,14 @@
            RESET & BASE
         ===================================================== */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+            /* Offset anchor link agar tidak tertutup navbar */
+            scroll-padding-top: 80px;
+        }
+        @media (max-width: 768px) {
+            html { scroll-padding-top: 64px; }
+        }
         body {
             font-family: 'DM Sans', sans-serif;
             background: var(--bg);
@@ -101,31 +119,55 @@
             font-weight: 300;
             -webkit-font-smoothing: antialiased;
             transition: background 0.35s ease, color 0.35s ease;
+            /* Space for bottom nav on mobile */
+            padding-bottom: 0;
+        }
+        @media (max-width: 768px) {
+            body { padding-bottom: 72px; }
         }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
 
         /* =====================================================
-           NAVBAR
+           NAVBAR — Desktop only (hidden on mobile)
         ===================================================== */
         #navbar {
             position: fixed;
             top: 0; left: 0; right: 0;
             z-index: 1000;
-            height: 72px;
+            height: 68px;
             display: flex;
             align-items: center;
-            padding: 0 1.5rem;
+            padding: 0;
             background: var(--nav-bg);
-            transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
+            /* GPU layer hanya saat diperlukan (mobile override di bawah) */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        /* Desktop: lepas will-change agar tidak buang memori GPU */
+        @media (min-width: 769px) {
+            #navbar { will-change: auto; }
+        }
+        #navbar .container {
+            height: 100%;
+            display: flex;
+            align-items: center;
         }
         #navbar.scrolled {
-            background: var(--nav-bg-scroll);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--nav-border);
-            box-shadow: var(--shadow-sm);
+            background: rgba(10, 11, 13, 0.55);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,0.055);
+            box-shadow: 0 2px 40px rgba(0,0,0,0.3);
+        }
+        [data-theme="light"] #navbar.scrolled {
+            background: rgba(252, 250, 247, 0.92);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 2px 24px rgba(0,0,0,0.09);
         }
         .nav-logo {
             font-family: 'Playfair Display', serif;
@@ -193,74 +235,301 @@
             transform: rotate(15deg);
         }
 
-        /* Mobile hamburger */
-        .nav-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--text);
-            font-size: 1.4rem;
-            cursor: pointer;
-            padding: 0.25rem;
+        /* Hide hamburger — no longer needed */
+        .nav-toggle { display: none !important; }
+
+        /* On mobile: hide desktop nav links */
+        @media (max-width: 768px) {
+            .nav-links { display: none !important; }
+            /* Keep navbar visible on mobile for logo only */
+            #navbar {
+                height: 56px;
+                padding: 0;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                transform: none !important;
+                will-change: auto;
+            }
+            #navbar .container {
+                height: 56px;
+            }
+            #navbar.scrolled {
+                background: var(--nav-bg-scroll);
+            }
         }
 
-        /* User dropdown */
-        #user-dropdown-wrap { position: relative; }
+        /* =====================================================
+           USER DROPDOWN — Glassmorphism
+        ===================================================== */
+        /* #user-dropdown-wrap moved to portal — no longer in nav flow */
+
         #user-nav-dropdown {
+            /* HIDDEN by default — display:none is the only reliable way */
             display: none;
-            position: absolute;
-            top: calc(100% + 10px);
-            right: 0;
-            background: var(--card);
-            border: 1px solid var(--gold-border);
-            border-radius: 12px;
-            min-width: 210px;
+
+            /* Fixed to viewport — JS sets top/right dynamically */
+            position: fixed;
+            top: 72px;
+            right: 1.5rem;
+
+            /* Glassmorphism */
+            background: rgba(14, 15, 17, 0.78);
+            backdrop-filter: blur(32px) saturate(180%);
+            -webkit-backdrop-filter: blur(32px) saturate(180%);
+            border: 1px solid rgba(200, 169, 110, 0.15);
+            border-radius: 16px;
+            min-width: 230px;
             padding: 8px;
-            box-shadow: var(--shadow-md);
-            z-index: 999;
+            box-shadow:
+                0 16px 48px rgba(0,0,0,0.55),
+                0 1px 0 rgba(255,255,255,0.05) inset,
+                0 0 0 0.5px rgba(200,169,110,0.08);
+            z-index: 9999;
+
+            /* Animation via JS-toggled class */
+            opacity: 0;
+            transform: translateY(6px) scale(0.97);
+            transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34,1.2,0.64,1);
         }
+
+        [data-theme="light"] #user-nav-dropdown {
+            background: rgba(255, 255, 255, 0.82);
+            border-color: rgba(168, 135, 62, 0.2);
+            box-shadow:
+                0 8px 32px rgba(0,0,0,0.12),
+                0 1px 0 rgba(255,255,255,0.8) inset;
+        }
+
+        /* Open state — JS adds this class */
+        #user-nav-dropdown.dd-open {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
         .udd-header {
-            padding: 10px 12px 8px;
-            border-bottom: 1px solid var(--border);
+            padding: 10px 12px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
             margin-bottom: 4px;
         }
+        [data-theme="light"] .udd-header {
+            border-bottom-color: rgba(0,0,0,0.07);
+        }
         .udd-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
-        .udd-email { font-size: 0.72rem; color: var(--muted); }
+        .udd-email { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
+
         .udd-link {
-            display: flex; align-items: center; gap: 9px;
-            padding: 9px 12px; border-radius: 8px;
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; border-radius: 10px;
             font-size: 0.82rem; color: var(--muted);
             text-decoration: none;
-            transition: background 0.2s, color 0.2s;
+            transition: background 0.18s, color 0.18s;
         }
-        .udd-link i { color: var(--gold); width: 16px; }
-        .udd-link:hover { background: var(--gold-dim); color: var(--gold-light); }
-        .udd-sep { border-top: 1px solid var(--border); margin: 4px 0; }
+        .udd-link i { color: var(--gold); width: 16px; font-size: 0.9rem; flex-shrink: 0; }
+        .udd-link:hover {
+            background: rgba(200,169,110,0.10);
+            color: var(--text);
+        }
+        .udd-sep { border-top: 1px solid rgba(255,255,255,0.06); margin: 4px 0; }
+        [data-theme="light"] .udd-sep { border-top-color: rgba(0,0,0,0.07); }
         .udd-logout {
-            display: flex; align-items: center; gap: 9px;
-            padding: 9px 12px; border-radius: 8px;
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; border-radius: 10px;
             font-size: 0.82rem; color: var(--danger);
             background: none; border: none;
             width: 100%; cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.18s;
         }
         .udd-logout:hover { background: rgba(224,92,92,0.08); }
 
+        /* =====================================================
+           MOBILE-ONLY ELEMENTS — desktop: always hidden
+        ===================================================== */
+        #bottom-nav        { display: none; }
+        #bn-user-sheet     { display: none; }
+        #bn-sheet-overlay  { display: none; }
+        #mobile-topbar-right { display: none; }
+        /* Sembunyikan mobile-theme-btn di desktop */
+        #mobile-theme-btn  { display: none !important; }
+
+        /* =====================================================
+           MOBILE TOP BAR RIGHT (theme + profile icons)
+        ===================================================== */
+        /* Defined here for positioning, shown only in media query */
+        #mobile-topbar-right {
+            position: fixed;
+            top: 0; right: 0;
+            height: 56px;
+            display: none; /* overridden in media query */
+            align-items: center;
+            gap: 8px;
+            padding: 0 14px;
+            z-index: 1010;
+            /* Cegah gerak saat scroll */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        #mobile-theme-btn {
+            width: 34px; height: 34px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(200,169,110,0.08);
+            border: 1px solid rgba(200,169,110,0.18);
+            border-radius: 10px;
+            color: var(--gold);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #mobile-profile-btn {
+            width: 34px; height: 34px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--gold);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            padding: 0;
+        }
+        #mobile-profile-btn img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        #mobile-profile-btn i {
+            font-size: 1rem;
+            color: #1a1410;
+        }
+
+        /* =====================================================
+           BOTTOM NAVIGATION BAR — Mobile
+        ===================================================== */
+        /* Bottom sheet overlay */
+        #bn-sheet-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1049;
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        #bn-user-sheet {
+            position: fixed;
+            bottom: 64px; left: 0; right: 0;
+            background: var(--card);
+            border: 1px solid rgba(200,169,110,0.12);
+            border-radius: 20px 20px 0 0;
+            padding: 12px 12px 0;
+            z-index: 1050;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.45);
+            transform: translateY(calc(100% + 64px));
+            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        #bn-user-sheet.open  { transform: translateY(0); }
+        .bn-sheet-handle {
+            width: 32px; height: 3px;
+            background: var(--border-strong);
+            border-radius: 2px;
+            margin: 0 auto 12px;
+        }
+
         @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .nav-toggle { display: block; }
-            .nav-links.open {
+
+            /* Show mobile-only elements */
+            #mobile-topbar-right { display: flex !important; }
+            #bn-user-sheet       { display: block; }
+            #bn-sheet-overlay    { display: block; }
+            /* Override: tampilkan theme btn di mobile */
+            #mobile-theme-btn    { display: flex !important; }
+
+            /* Bottom nav bar */
+            #bottom-nav {
+                display: flex !important;
+                position: fixed;
+                bottom: 0; left: 0; right: 0;
+                z-index: 1100;
+                height: 64px;
+                background: var(--bottom-nav-bg);
+                backdrop-filter: blur(20px) saturate(160%);
+                -webkit-backdrop-filter: blur(20px) saturate(160%);
+                border-top: 1px solid var(--bottom-nav-border);
+                align-items: stretch;
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+                /* Cegah bottom nav gerak/jitter saat scroll */
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+                will-change: transform;
+                backface-visibility: hidden;
+                -webkit-backface-visibility: hidden;
+            }
+
+            /* Nav items */
+            .bn-item {
+                flex: 1;
                 display: flex;
                 flex-direction: column;
-                position: fixed;
-                top: 72px; left: 0; right: 0;
-                background: var(--nav-bg-scroll);
-                backdrop-filter: blur(20px);
-                border-bottom: 1px solid var(--border);
-                padding: 1rem;
-                gap: 0.25rem;
-                z-index: 999;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                text-decoration: none;
+                color: var(--muted);
+                border: none;
+                background: none;
+                cursor: pointer;
+                position: relative;
+                padding: 6px 4px;
+                transition: color 0.18s;
+                -webkit-tap-highlight-color: transparent;
             }
+
+            /* Minimal clean SVG-style icons via Bootstrap Icons */
+            .bn-item i {
+                font-size: 1.35rem;
+                line-height: 1;
+                transition: transform 0.18s cubic-bezier(0.34,1.4,0.64,1);
+                display: block;
+            }
+
+            .bn-item span {
+                font-size: 0.58rem;
+                font-weight: 500;
+                letter-spacing: 0.15px;
+                line-height: 1;
+            }
+
+            /* Active state */
+            .bn-item.active { color: var(--gold); }
+            .bn-item.active i { transform: translateY(-1px); }
+
+            /* Active pill indicator */
+            .bn-item.active::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 20px; height: 2px;
+                background: var(--gold);
+                border-radius: 0 0 2px 2px;
+            }
+
+            /* Tap feedback */
+            .bn-item:active i { transform: scale(0.87); }
+
+            /* User avatar in bottom nav */
+            .bn-avatar {
+                width: 24px; height: 24px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 1.5px solid transparent;
+                transition: border-color 0.18s;
+                display: block;
+            }
+            .bn-item.active .bn-avatar { border-color: var(--gold); }
         }
 
         /* =====================================================
@@ -271,10 +540,15 @@
             min-height: 240px;
             display: flex;
             align-items: flex-end;
-            padding: calc(72px + 2.5rem) 0 3rem;
+            padding: calc(68px + 2.5rem) 0 3rem;
             background-size: cover;
             background-position: center;
             overflow: hidden;
+        }
+        @media (max-width: 768px) {
+            .breadcrumbs {
+                padding: calc(56px + 2rem) 0 2.5rem;
+            }
         }
         .breadcrumbs::before {
             content: '';
@@ -416,69 +690,111 @@
         .portfolio-grid-item:hover .portfolio-grid-overlay { opacity: 1; }
         .portfolio-grid-overlay h4 {
             font-family: 'Playfair Display', serif;
-            font-size: 0.95rem; color: #f0ede8; margin-bottom: 0.2rem;
+            font-size: 1rem; font-weight: 600;
+            color: #f0ede8; margin-bottom: 0.3rem;
         }
-        .portfolio-grid-overlay span { font-size: 0.75rem; color: rgba(240,237,232,0.6); }
-        .portfolio-grid-actions { display: flex; gap: 0.4rem; margin-top: 0.6rem; }
-        .portfolio-grid-actions a {
-            width: 30px; height: 30px;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(200,169,110,0.15);
-            border: 1px solid rgba(200,169,110,0.3);
-            border-radius: 50%; color: var(--gold);
-            font-size: 0.8rem; text-decoration: none;
-            transition: background 0.25s;
+        .portfolio-grid-overlay p {
+            font-size: 0.78rem; color: rgba(240,237,232,0.7);
         }
-        .portfolio-grid-actions a:hover { background: var(--gold); color: #1a1410; }
 
         /* =====================================================
-           PACKAGE CARD (used on homepage)
+           PACKAGE CARDS
         ===================================================== */
         .package-card {
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: 16px; overflow: hidden; height: 100%;
-            transition: transform 0.28s, box-shadow 0.28s, border-color 0.28s;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.28s cubic-bezier(0.4,0,0.2,1),
+                        box-shadow 0.28s ease,
+                        border-color 0.28s ease;
+            height: 100%;
         }
         .package-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-6px);
             box-shadow: var(--shadow-md);
             border-color: var(--gold-border);
         }
-        .package-img { position: relative; aspect-ratio: 4/3; overflow: hidden; }
-        .package-img img {
-            width: 100%; height: 100%; object-fit: cover;
-            transition: transform 0.6s ease;
+        .package-card.featured {
+            border-color: var(--gold-border);
+            box-shadow: 0 0 0 1px var(--gold-border), var(--shadow-sm);
         }
-        .package-card:hover .package-img img { transform: scale(1.05); }
-        .package-cat-badge { position: absolute; top: 1rem; left: 1rem; }
-        .package-body { padding: 1.5rem; }
-        .package-name {
+        .pkg-img-wrap { position: relative; overflow: hidden; height: 200px; }
+        .pkg-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
+        .package-card:hover .pkg-img-wrap img { transform: scale(1.06); }
+        .pkg-badge {
+            position: absolute; top: 12px; left: 12px;
+            padding: 4px 10px; border-radius: 100px;
+            font-size: 0.65rem; font-weight: 600; letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .pkg-badge-gold { background: var(--gold); color: #1a1410; }
+        .pkg-badge-pop  { background: #4caf82; color: #fff; }
+        .pkg-body { padding: 1.5rem; }
+        .pkg-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem; font-weight: 600;
+            color: var(--text); margin-bottom: 0.35rem;
+        }
+        .pkg-desc { font-size: 0.83rem; color: var(--muted); margin-bottom: 1.1rem; line-height: 1.7; }
+        .pkg-features { list-style: none; padding: 0; margin: 0 0 1.25rem; }
+        .pkg-features li {
+            display: flex; align-items: flex-start; gap: 0.6rem;
+            font-size: 0.82rem; color: var(--muted);
+            padding: 0.3rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .pkg-features li:last-child { border-bottom: none; }
+        .pkg-features li i { color: var(--gold); font-size: 0.75rem; margin-top: 3px; flex-shrink: 0; }
+        .pkg-footer {
+            padding: 1rem 1.5rem 1.5rem;
+            display: flex; align-items: center; justify-content: space-between;
+            border-top: 1px solid var(--border);
+        }
+
+        /* =====================================================
+           WHY CARDS
+        ===================================================== */
+        .why-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 2rem 1.75rem;
+            transition: transform 0.28s ease, border-color 0.28s, box-shadow 0.28s;
+            height: 100%;
+        }
+        .why-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--gold-border);
+            box-shadow: var(--shadow-sm);
+        }
+        .why-icon {
+            width: 48px; height: 48px;
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-border);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; color: var(--gold);
+            margin-bottom: 1.25rem;
+        }
+        .why-title {
             font-family: 'Playfair Display', serif;
             font-size: 1.05rem; font-weight: 600;
             color: var(--text); margin-bottom: 0.5rem;
         }
-        .package-price {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2rem; font-weight: 600; color: var(--gold);
-        }
-        .package-link {
-            display: inline-flex; align-items: center; gap: 0.35rem;
-            font-size: 0.8rem; font-weight: 500; color: var(--muted);
-            text-decoration: none; margin-top: 1rem;
-            transition: color 0.25s;
-        }
-        .package-link:hover { color: var(--gold); }
+        .why-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.8; }
 
         /* =====================================================
-           TESTIMONIAL
+           TESTIMONIALS
         ===================================================== */
         .testimonial-card {
-            background: var(--card); border: 1px solid var(--border);
-            border-radius: 16px; padding: 2rem;
-            position: relative; height: 100%;
-            transition: border-color 0.28s, transform 0.28s;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            height: 100%;
+            position: relative;
         }
-        .testimonial-card:hover { border-color: var(--gold-border); transform: translateY(-3px); }
         .testimonial-card::before {
             content: '\201C';
             font-family: 'Playfair Display', serif;
@@ -487,63 +803,101 @@
             position: absolute; top: 1rem; left: 1.5rem;
         }
         .testimonial-stars { color: var(--gold); font-size: 0.85rem; margin-bottom: 0.75rem; }
-        .testimonial-text { color: var(--muted); font-size: 0.9rem; line-height: 1.8; margin-bottom: 1.25rem; }
-        .testimonial-author { font-weight: 500; font-size: 0.9rem; color: var(--text); }
+        .testimonial-text { color: var(--muted); font-size: 0.88rem; line-height: 1.8; margin-bottom: 1.25rem; }
+        .testimonial-author { font-weight: 500; font-size: 0.88rem; color: var(--text); }
+
+        /* =====================================================
+           HERO (Home)
+        ===================================================== */
+        .hero {
+            position: relative;
+            min-height: 100svh;
+            min-height: 100vh; /* fallback browser lama */
+            min-height: 100svh; /* modern: exclude browser UI */
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            padding-top: 68px;
+        }
+        @media (max-width: 768px) {
+            .hero { padding-top: 56px; }
+        }
 
         /* =====================================================
            FOOTER
         ===================================================== */
         footer {
             background: var(--footer-bg);
+            padding: 5rem 0 3rem;
             border-top: 1px solid var(--border);
-            padding: 5rem 0 2rem;
         }
-        [data-theme="light"] footer { background: #1a1814; }
-
+        @media (max-width: 768px) {
+            footer {
+                /* Tambah ruang untuk bottom nav (64px) + sedikit buffer */
+                padding-bottom: calc(64px + 2rem);
+            }
+        }
         .footer-logo {
             font-family: 'Playfair Display', serif;
-            font-size: 1.4rem; font-weight: 700;
-            color: #f0ede8 !important; text-decoration: none;
+            font-size: 1.6rem; font-weight: 700;
+            color: #f0ede8 !important;
+            text-decoration: none;
         }
         .footer-logo span { color: var(--gold); }
-        .footer-tagline { font-size: 0.875rem; color: #8a8880; line-height: 1.7; max-width: 280px; }
-
-        .footer-social { display: flex; gap: 0.5rem; margin-top: 1.25rem; }
+        .footer-tagline { font-size: 0.875rem; color: var(--muted); line-height: 1.8; max-width: 260px; }
+        .footer-social { display: flex; gap: 0.75rem; flex-wrap: wrap; }
         .footer-social a {
-            width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px; color: #8a8880;
-            font-size: 0.9rem; text-decoration: none;
+            width: 38px; height: 38px;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 10px; display: flex; align-items: center;
+            justify-content: center; color: var(--muted);
+            text-decoration: none; font-size: 1rem;
             transition: all 0.25s;
         }
-        .footer-social a:hover { background: var(--gold); border-color: var(--gold); color: #1a1410; }
-
-        .footer-heading {
-            font-size: 0.72rem; font-weight: 600;
-            letter-spacing: 0.14em; text-transform: uppercase;
-            color: #f0ede8; margin-bottom: 1.25rem;
-        }
+        .footer-social a:hover { background: var(--gold); color: #1a1410; border-color: var(--gold); }
+        .footer-heading { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.1rem; }
         .footer-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; }
-        .footer-links a { color: #8a8880; text-decoration: none; font-size: 0.875rem; transition: color 0.25s; }
+        .footer-links a { color: var(--dim); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
         .footer-links a:hover { color: var(--gold); }
-
-        .footer-contact-item {
-            display: flex; align-items: flex-start; gap: 0.75rem;
-            margin-bottom: 0.85rem; font-size: 0.875rem; color: #8a8880;
-        }
-        .footer-contact-item i { color: var(--gold); font-size: 0.9rem; margin-top: 0.15rem; flex-shrink: 0; }
-        .footer-contact-item a { color: #8a8880; text-decoration: none; transition: color 0.25s; }
+        .footer-contact-item { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .footer-contact-item i { color: var(--gold); font-size: 0.9rem; margin-top: 3px; flex-shrink: 0; }
+        .footer-contact-item span, .footer-contact-item a { font-size: 0.875rem; color: var(--dim); text-decoration: none; }
         .footer-contact-item a:hover { color: var(--gold); }
-
-        .footer-divider { border-color: rgba(255,255,255,0.07); margin: 3rem 0 1.5rem; }
+        .footer-divider { border-color: var(--border); margin: 3rem 0 2rem; }
         .footer-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
-        .footer-copy { font-size: 0.78rem; color: #555350; margin: 0; }
-        .footer-copy i { color: var(--gold); }
+        .footer-copy { font-size: 0.8rem; color: var(--dim); margin: 0; }
 
         /* =====================================================
-           MODAL (Login)
+           FORM ELEMENTS
+        ===================================================== */
+        .form-control-dark {
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text) !important;
+            border-radius: 8px !important;
+            font-size: 0.875rem !important;
+            padding: 0.65rem 1rem !important;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control-dark:focus {
+            border-color: var(--gold-border) !important;
+            box-shadow: 0 0 0 3px var(--gold-dim) !important;
+            outline: none;
+        }
+        .form-control-dark::placeholder { color: var(--dim); }
+        .form-label-dark { font-size: 0.82rem; font-weight: 500; color: var(--muted); margin-bottom: 0.4rem; }
+
+        /* =====================================================
+           ALERTS
+        ===================================================== */
+        .alert-gold {
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-border);
+            border-radius: 10px; padding: 0.85rem 1.1rem;
+            font-size: 0.875rem; color: var(--gold-light);
+        }
+
+        /* =====================================================
+           MODAL
         ===================================================== */
         .modal-content {
             background: var(--card) !important;
@@ -567,6 +921,30 @@
         .text-muted-custom { color: var(--muted); }
         .text-accent { color: var(--gold); }
         .text-gold { color: var(--gold); }
+
+        /* =====================================================
+           ACCESSIBILITY — Reduced Motion
+        ===================================================== */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            /* AOS: nonaktifkan transform bawaan */
+            [data-aos] {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+            }
+            .package-card:hover,
+            .why-card:hover,
+            .portfolio-grid-item:hover img,
+            .package-card:hover .pkg-img-wrap img {
+                transform: none !important;
+            }
+        }
 
         /* Prevent AOS flash */
         [data-aos] { opacity: 1 !important; }
@@ -606,7 +984,7 @@
 </head>
 <body>
 
-{{-- ======= NAVBAR ======= --}}
+{{-- ======= NAVBAR (Desktop only — logo stays visible on mobile) ======= --}}
 <nav id="navbar">
     <div class="container d-flex align-items-center justify-content-between gap-3">
 
@@ -615,12 +993,7 @@
             Tele<span>grad</span>
         </a>
 
-        {{-- Mobile hamburger --}}
-        <button class="nav-toggle ms-auto" id="navToggle" aria-label="Toggle menu">
-            <i class="bi bi-list"></i>
-        </button>
-
-        {{-- Nav links --}}
+        {{-- Desktop Nav links (hidden on mobile) --}}
         <ul class="nav-links" id="navLinks">
             <li>
                 <a href="{{ route('home') }}"
@@ -647,7 +1020,7 @@
                 </a>
             </li>
 
-            {{-- Theme Toggle --}}
+            {{-- Theme Toggle (desktop) --}}
             <li>
                 <button class="theme-toggle" id="themeToggle" aria-label="Toggle tema" title="Toggle Dark/Light Mode">
                     <i class="bi bi-sun-fill" id="themeIcon"></i>
@@ -656,38 +1029,16 @@
 
             {{-- Auth --}}
             @auth
-            <li class="position-relative" id="user-dropdown-wrap">
-                <a href="#" class="nav-cta d-flex align-items-center gap-2" id="user-nav-btn">
+            <li>
+                <button class="nav-cta d-flex align-items-center gap-2" id="user-nav-btn" style="border:none;cursor:pointer;">
                     <img src="{{ Auth::user()->photo
                         ? asset('storage/images/profile/' . Auth::user()->photo)
                         : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=c8a96e&color=1a1408&size=32' }}"
                          style="width:22px;height:22px;border-radius:50%;object-fit:cover;"
                          alt="{{ Auth::user()->name }}">
                     <span>{{ Str::words(Auth::user()->name, 1, '') }}</span>
-                    <i class="bi bi-chevron-down" style="font-size:.6rem;"></i>
-                </a>
-                <div id="user-nav-dropdown">
-                    <div class="udd-header">
-                        <div class="udd-name">{{ Auth::user()->name }}</div>
-                        <div class="udd-email">{{ Auth::user()->email }}</div>
-                    </div>
-                    <a href="{{ route('customer.orders') }}" class="udd-link">
-                        <i class="bi bi-list-check"></i> Pesanan Saya
-                    </a>
-                    <a href="{{ route('customer.profile') }}" class="udd-link">
-                        <i class="bi bi-person-gear"></i> Profil Saya
-                    </a>
-                    <a href="{{ route('packages.categories') }}" class="udd-link">
-                        <i class="bi bi-camera"></i> Pesan Foto
-                    </a>
-                    <div class="udd-sep"></div>
-                    <form action="{{ route('customer.logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="udd-logout">
-                            <i class="bi bi-box-arrow-right"></i> Keluar
-                        </button>
-                    </form>
-                </div>
+                    <i class="bi bi-chevron-down" id="udd-chevron" style="font-size:.6rem;transition:transform 0.2s;"></i>
+                </button>
             </li>
             @else
             <li>
@@ -699,6 +1050,146 @@
         </ul>
     </div>
 </nav>
+
+{{-- ======= DESKTOP USER DROPDOWN PORTAL (outside navbar flow) ======= --}}
+@auth
+<div id="user-nav-dropdown" role="menu" aria-label="Menu akun">
+    <div class="udd-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <img src="{{ Auth::user()->photo
+                ? asset('storage/images/profile/' . Auth::user()->photo)
+                : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=c8a96e&color=1a1408&size=64' }}"
+                 style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(200,169,110,0.35);"
+                 alt="{{ Auth::user()->name }}">
+            <div>
+                <div class="udd-name">{{ Auth::user()->name }}</div>
+                <div class="udd-email">{{ Auth::user()->email }}</div>
+            </div>
+        </div>
+    </div>
+    <a href="{{ route('customer.orders') }}" class="udd-link">
+        <i class="bi bi-list-check"></i> Pesanan Saya
+    </a>
+    <a href="{{ route('customer.profile') }}" class="udd-link">
+        <i class="bi bi-person-gear"></i> Profil Saya
+    </a>
+    <a href="{{ route('packages.categories') }}" class="udd-link">
+        <i class="bi bi-camera"></i> Pesan Foto
+    </a>
+    <div class="udd-sep"></div>
+    <form action="{{ route('customer.logout') }}" method="POST">
+        @csrf
+        <button type="submit" class="udd-logout">
+            <i class="bi bi-box-arrow-right"></i> Keluar
+        </button>
+    </form>
+</div>
+@endauth
+
+{{-- ======= MOBILE: Topbar kanan (theme toggle) ======= --}}
+<div id="mobile-topbar-right">
+    <button id="mobile-theme-btn" aria-label="Toggle tema">
+        <i class="bi bi-sun-fill" id="mobileThemeIcon"></i>
+    </button>
+</div>
+
+{{-- ======= BOTTOM NAVIGATION (Mobile only — Instagram style) ======= --}}
+<nav id="bottom-nav" role="navigation" aria-label="Navigasi utama">
+
+    {{-- Beranda --}}
+    <a href="{{ route('home') }}"
+       class="bn-item {{ request()->routeIs('home') ? 'active' : '' }}"
+       aria-label="Beranda">
+        <i class="bi {{ request()->routeIs('home') ? 'bi-house-fill' : 'bi-house' }}"></i>
+        <span>Beranda</span>
+    </a>
+
+    {{-- Paket --}}
+    <a href="{{ route('packages.categories') }}"
+       class="bn-item {{ request()->is('packages*') ? 'active' : '' }}"
+       aria-label="Paket">
+        <i class="bi {{ request()->is('packages*') ? 'bi-grid-fill' : 'bi-grid' }}"></i>
+        <span>Paket</span>
+    </a>
+
+    {{-- Pesan Foto — CTA center --}}
+    <a href="{{ route('packages.categories') }}"
+       class="bn-item bn-cta"
+       aria-label="Pesan Foto">
+        <div class="bn-cta-wrap">
+            <i class="bi bi-camera-fill"></i>
+        </div>
+        <span>Pesan</span>
+    </a>
+
+    {{-- Portofolio --}}
+    <a href="{{ route('portfolio.index') }}"
+       class="bn-item {{ request()->is('portfolio*') ? 'active' : '' }}"
+       aria-label="Portofolio">
+        <i class="bi {{ request()->is('portfolio*') ? 'bi-images' : 'bi-images' }}"></i>
+        <span>Portfolio</span>
+    </a>
+
+    {{-- Akun / Kontak --}}
+    @auth
+    <button class="bn-item {{ request()->is('customer*') ? 'active' : '' }}"
+            id="bn-user-btn"
+            aria-label="Akun saya">
+        <img class="bn-avatar"
+             src="{{ Auth::user()->photo
+                ? asset('storage/images/profile/' . Auth::user()->photo)
+                : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=c8a96e&color=1a1408&size=52' }}"
+             alt="{{ Auth::user()->name }}">
+        <span>Akun</span>
+    </button>
+    @else
+    <a href="{{ route('customer.login') }}"
+       class="bn-item"
+       aria-label="Masuk">
+        <i class="bi bi-person-circle"></i>
+        <span>Masuk</span>
+    </a>
+    @endauth
+
+</nav>
+
+{{-- ======= BOTTOM SHEET (Mobile user menu) ======= --}}
+@auth
+<div id="bn-sheet-overlay"></div>
+<div id="bn-user-sheet" role="dialog" aria-label="Menu akun">
+    <div class="bn-sheet-handle"></div>
+    {{-- User info --}}
+    <div style="display:flex;align-items:center;gap:12px;padding:0 4px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;">
+        <img src="{{ Auth::user()->photo
+            ? asset('storage/images/profile/' . Auth::user()->photo)
+            : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=c8a96e&color=1a1408&size=80' }}"
+             style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);"
+             alt="{{ Auth::user()->name }}">
+        <div>
+            <div style="font-size:.9rem;font-weight:600;color:var(--text);">{{ Auth::user()->name }}</div>
+            <div style="font-size:.75rem;color:var(--muted);">{{ Auth::user()->email }}</div>
+        </div>
+    </div>
+    {{-- Menu items --}}
+    <a href="{{ route('customer.orders') }}" class="udd-link" style="border-radius:10px;padding:12px 14px;font-size:.875rem;">
+        <i class="bi bi-list-check" style="font-size:1.1rem;"></i> Pesanan Saya
+    </a>
+    <a href="{{ route('customer.profile') }}" class="udd-link" style="border-radius:10px;padding:12px 14px;font-size:.875rem;">
+        <i class="bi bi-person-gear" style="font-size:1.1rem;"></i> Profil Saya
+    </a>
+    <a href="{{ route('packages.categories') }}" class="udd-link" style="border-radius:10px;padding:12px 14px;font-size:.875rem;">
+        <i class="bi bi-camera" style="font-size:1.1rem;"></i> Pesan Foto
+    </a>
+    <div style="border-top:1px solid var(--border);margin:8px 0;"></div>
+    <form action="{{ route('customer.logout') }}" method="POST">
+        @csrf
+        <button type="submit" class="udd-logout" style="border-radius:10px;padding:12px 14px;font-size:.875rem;width:100%;">
+            <i class="bi bi-box-arrow-right" style="font-size:1.1rem;"></i> Keluar
+        </button>
+    </form>
+    <div style="height: env(safe-area-inset-bottom, 12px);"></div>
+</div>
+@endauth
 
 {{-- ======= CONTENT ======= --}}
 @yield('content')
@@ -814,25 +1305,20 @@
 
 <script>
 // ── AOS ──────────────────────────────────────────────────────
-AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 60 });
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+AOS.init({
+    duration: 700,
+    easing: 'ease-out-cubic',
+    once: true,
+    offset: 60,
+    disable: prefersReducedMotion,
+});
 
 // ── Navbar scroll effect ──────────────────────────────────────
 const navbar = document.getElementById('navbar');
 const onScroll = () => navbar.classList.toggle('scrolled', window.scrollY > 30);
 window.addEventListener('scroll', onScroll, { passive: true });
 onScroll();
-
-// ── Mobile menu toggle ────────────────────────────────────────
-document.getElementById('navToggle')?.addEventListener('click', () => {
-    document.getElementById('navLinks')?.classList.toggle('open');
-});
-
-// ── Close mobile menu on link click ──────────────────────────
-document.querySelectorAll('#navLinks a').forEach(link => {
-    link.addEventListener('click', () => {
-        document.getElementById('navLinks')?.classList.remove('open');
-    });
-});
 
 // ── GLightbox ─────────────────────────────────────────────────
 const lightbox = GLightbox({ touchNavigation: true, loop: true, zoomable: true });
@@ -857,48 +1343,114 @@ document.querySelectorAll('.portfolio-isotope').forEach(container => {
     });
 });
 
-// ── User dropdown ─────────────────────────────────────────────
+// ── Desktop User dropdown — fixed portal positioning ─────────
 const userBtn = document.getElementById('user-nav-btn');
 const userDd  = document.getElementById('user-nav-dropdown');
+const uddChevron = document.getElementById('udd-chevron');
+
+function positionDropdown() {
+    if (!userBtn || !userDd) return;
+    const rect = userBtn.getBoundingClientRect();
+    const rightFromViewport = window.innerWidth - rect.right;
+    userDd.style.top  = (rect.bottom + 10) + 'px';
+    userDd.style.right = Math.max(rightFromViewport, 12) + 'px';
+    userDd.style.left = 'auto';
+}
+
+function openDropdown() {
+    positionDropdown();
+    // Add class (display:block + start transition on next frame)
+    userDd.classList.add('dd-open');
+    if (uddChevron) uddChevron.style.transform = 'rotate(180deg)';
+}
+function closeDropdown() {
+    userDd.classList.remove('dd-open');
+    if (uddChevron) uddChevron.style.transform = 'rotate(0deg)';
+}
+
 if (userBtn && userDd) {
     userBtn.addEventListener('click', e => {
-        e.preventDefault();
-        const isOpen = userDd.style.display === 'block';
-        userDd.style.display = isOpen ? 'none' : 'block';
+        e.stopPropagation();
+        userDd.classList.contains('dd-open') ? closeDropdown() : openDropdown();
     });
     document.addEventListener('click', e => {
-        if (!document.getElementById('user-dropdown-wrap')?.contains(e.target)) {
-            if (userDd) userDd.style.display = 'none';
+        if (!userDd.contains(e.target) && !userBtn.contains(e.target)) {
+            closeDropdown();
         }
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeDropdown();
+    });
+    window.addEventListener('scroll', () => {
+        if (userDd.classList.contains('dd-open')) positionDropdown();
+    }, { passive: true });
+    window.addEventListener('resize', () => {
+        if (userDd.classList.contains('dd-open')) positionDropdown();
     });
 }
 
-// ── Dark / Light Mode Toggle ──────────────────────────────────
-const html      = document.documentElement;
-const toggleBtn = document.getElementById('themeToggle');
-const themeIcon = document.getElementById('themeIcon');
+// ── Dark / Light Mode Toggle (shared logic) ───────────────────
+const html       = document.documentElement;
+const themeIcon  = document.getElementById('themeIcon');
+const mobileIcon = document.getElementById('mobileThemeIcon');
 
-// Load saved preference (default: dark)
 const savedTheme = localStorage.getItem('tg-theme') || 'dark';
 html.setAttribute('data-theme', savedTheme);
-updateIcon(savedTheme);
+applyThemeIcon(savedTheme);
 
-toggleBtn?.addEventListener('click', () => {
+function applyThemeIcon(theme) {
+    const isDark = theme === 'dark';
+    if (themeIcon) {
+        themeIcon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+    }
+    if (mobileIcon) {
+        mobileIcon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+    }
+    // Sync meta color-scheme dengan tema aktif
+    document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', isDark ? 'dark' : 'light');
+}
+
+function toggleTheme() {
     const current = html.getAttribute('data-theme');
     const next    = current === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('tg-theme', next);
-    updateIcon(next);
-});
+    applyThemeIcon(next);
+}
 
-function updateIcon(theme) {
-    if (!themeIcon) return;
-    if (theme === 'dark') {
-        themeIcon.className = 'bi bi-sun-fill';
-        toggleBtn.title     = 'Ganti ke Mode Terang';
-    } else {
-        themeIcon.className = 'bi bi-moon-fill';
-        toggleBtn.title     = 'Ganti ke Mode Gelap';
+document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+document.getElementById('mobile-theme-btn')?.addEventListener('click', toggleTheme);
+
+// ── Mobile Bottom Nav: User Sheet ─────────────────────────────
+const bnUserBtn   = document.getElementById('bn-user-btn');
+const bnUserSheet = document.getElementById('bn-user-sheet');
+const bnOverlay   = document.getElementById('bn-sheet-overlay');
+
+if (bnUserBtn && bnUserSheet) {
+    bnUserBtn.addEventListener('click', () => {
+        bnUserSheet.classList.toggle('open');
+        if (bnOverlay) {
+            bnOverlay.style.display = 'block';
+            requestAnimationFrame(() => bnOverlay.classList.toggle('open', bnUserSheet.classList.contains('open')));
+        }
+    });
+
+    // Close on overlay tap
+    bnOverlay?.addEventListener('click', closeSheet);
+
+    // Swipe down to close
+    let startY = 0;
+    bnUserSheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+    bnUserSheet.addEventListener('touchend', e => {
+        if (e.changedTouches[0].clientY - startY > 60) closeSheet();
+    }, { passive: true });
+}
+
+function closeSheet() {
+    bnUserSheet?.classList.remove('open');
+    if (bnOverlay) {
+        bnOverlay.classList.remove('open');
+        setTimeout(() => { bnOverlay.style.display = 'none'; }, 250);
     }
 }
 </script>

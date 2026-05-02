@@ -661,16 +661,30 @@
                 </div>
                 @endif
             @empty
-                <div id="pkg-empty-msg" style="display:block;">
-                    <i class="bi bi-camera-slash"></i>
+                {{--
+                    Paket di database benar-benar kosong.
+                    Gunakan id berbeda agar tidak bentrok dengan pesan filter JS.
+                --}}
+                <div id="pkg-no-data" style="display:block; width:100%; text-align:center; padding:3rem 0; color:var(--muted);">
+                    <i class="bi bi-camera-slash" style="font-size:2.5rem; color:var(--gold); opacity:0.4; display:block; margin-bottom:0.75rem;"></i>
                     Belum ada paket tersedia.
                 </div>
             @endforelse
 
-            {{-- Pesan kosong saat filter aktif tapi tidak ada hasil --}}
+            {{--
+                Pesan ini dikontrol sepenuhnya oleh JS filter.
+                HARUS hanya ada SATU elemen dengan id ini.
+                Jangan duplikat id ini di mana pun di halaman ini.
+            --}}
             <div id="pkg-empty-msg">
                 <i class="bi bi-funnel"></i>
                 Tidak ada paket untuk kategori ini.
+            </div>
+            {{-- Tombol lihat semua paket --}}
+            <div style="width:100%; text-align:center; margin-top:2rem;">
+                <a href="{{ route('packages.categories') }}" class="btn-outline-gold">
+                    <i class="bi bi-grid"></i> Lihat Semua Paket
+                </a>
             </div>
         </div>
     </div>
@@ -887,34 +901,22 @@
 
 @push('js')
 <script>
-// ── Package Filter (Fixed Version) ───────────────────────────────────────────
-//
-// BUG SEBELUMNYA:
-//   Filter menggunakan `item.style.display = 'none'` pada elemen <div> yang
-//   memiliki class Bootstrap col-lg-4 / col-md-6. Ketika kolom disembunyikan,
-//   Bootstrap grid tetap meninggalkan ruang kosong, sehingga layout "bolong".
-//
-// SOLUSI:
-//   1. Grid sekarang menggunakan flex layout sendiri (bukan Bootstrap col-).
-//   2. Filter menambahkan class `.pkg-hidden` (display:none) langsung pada
-//      elemen `.pkg-home-item`, sehingga item benar-benar hilang dari flow.
-//   3. Jika tidak ada item yang cocok, tampilkan pesan kosong (#pkg-empty-msg).
-//
-// FORMAT DATA FILTER:
-//   - Tombol filter: data-filter="*" atau data-filter="filter-{slug}"
-//   - Item: class="pkg-home-item filter-{slug}"
-//   Contoh: tombol "Yudisium" → data-filter="filter-yudisium"
-//           card yudisium    → class="pkg-home-item filter-yudisium"
-// ─────────────────────────────────────────────────────────────────────────────
+
 (function () {
-    const filters   = document.querySelectorAll('#pkg-filters li');
-    const items     = document.querySelectorAll('.pkg-home-item');
-    const emptyMsg  = document.getElementById('pkg-empty-msg');
+    const filters  = document.querySelectorAll('#pkg-filters li');
+    const items    = document.querySelectorAll('.pkg-home-item');
+    const emptyMsg = document.getElementById('pkg-empty-msg');
+
+    // Sembunyikan #pkg-no-data (pesan DB kosong) jika ada item yang di-render
+    const noDataMsg = document.getElementById('pkg-no-data');
+    if (noDataMsg && items.length > 0) {
+        noDataMsg.style.display = 'none';
+    }
 
     function applyFilter(filterValue) {
         let visibleCount = 0;
 
-        items.forEach(item => {
+        items.forEach(function (item) {
             const show = filterValue === '*' || item.classList.contains(filterValue);
             if (show) {
                 item.classList.remove('pkg-hidden');
@@ -924,23 +926,21 @@
             }
         });
 
-        // Tampilkan/sembunyikan pesan kosong
+        // Tampilkan/sembunyikan pesan "tidak ada paket untuk kategori ini"
         if (emptyMsg) {
             emptyMsg.style.display = visibleCount === 0 ? 'block' : 'none';
         }
     }
 
-    filters.forEach(btn => {
+    filters.forEach(function (btn) {
         btn.addEventListener('click', function () {
-            // Update active state
-            filters.forEach(b => b.classList.remove('filter-active'));
+            filters.forEach(function (b) { b.classList.remove('filter-active'); });
             this.classList.add('filter-active');
-
             applyFilter(this.dataset.filter);
         });
     });
 
-    // Jalankan filter awal (tampilkan semua)
+    // Jalankan filter awal → tampilkan semua
     applyFilter('*');
 })();
 </script>

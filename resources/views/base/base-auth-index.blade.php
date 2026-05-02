@@ -3,263 +3,259 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" type="image/png" href="{{ asset('auth/assets/img/favicon.png') }}">
+    <link rel="icon" href="{{ asset('images/logo_telegrad_blue.png') }}" type="image/png">
     <title>{{ ($web->site_name ?? 'Telegrad') . ' — ' . ($submenu ?? 'Masuk') }}</title>
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
     <link href="{{ asset('root/assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
-
-    <!-- Argon -->
     <link href="{{ asset('auth/assets/css/nucleo-icons.css') }}" rel="stylesheet"/>
     <link href="{{ asset('auth/assets/css/nucleo-svg.css') }}" rel="stylesheet"/>
     <link href="{{ asset('auth/assets/css/argon-dashboard.min.css?v=2.0.4') }}" rel="stylesheet"/>
 
     <style>
         :root {
-            --tg-navy:  #0A1628;
-            --tg-royal: #1E3A8A;
-            --tg-blue:  #3B82F6;
-            --tg-font:  'Plus Jakarta Sans', sans-serif;
+            --c-ink:      #0F1117;
+            --c-ink-2:    #4B5563;
+            --c-ink-3:    #9CA3AF;
+            --c-surface:  #FFFFFF;
+            --c-bg:       #F5F5F0;
+            --c-border:   #E4E4E0;
+            --c-accent:   #2563EB;
+            --c-accent-h: #1D4ED8;
+            --c-err:      #DC2626;
+            --r-input:    8px;
+            --r-btn:      8px;
+            --font-sans:  'DM Sans', sans-serif;
+            --font-serif: 'DM Serif Display', serif;
         }
 
-        *, body { font-family: var(--tg-font) !important; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; font-family: var(--font-sans); background: var(--c-bg); color: var(--c-ink); }
 
-        /* ─── Full viewport layout ─── */
-        html, body { height: 100%; margin: 0; }
-
-        .auth-wrapper {
+        /* ── Layout ── */
+        .auth-shell {
             min-height: 100vh;
-            display: flex;
+            display: grid;
+            grid-template-columns: 480px 1fr;
         }
 
-        /* ─── Left panel — form ─── */
-        .auth-left {
-            width: 480px;
-            min-width: 320px;
-            max-width: 100%;
+        /* ── Left pane ── */
+        .auth-pane {
+            background: var(--c-surface);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 48px 52px;
-            background: #fff;
+            padding: 56px 52px;
             position: relative;
-            z-index: 2;
+            border-right: 1px solid var(--c-border);
         }
 
-        /* ─── Right panel — visual ─── */
-        .auth-right {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Back link */
+        .auth-back {
+            position: absolute; top: 28px; left: 52px;
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 500; color: var(--c-ink-3);
+            text-decoration: none; letter-spacing: .01em;
+            transition: color .15s;
         }
-        .auth-right-bg {
-            position: absolute; inset: 0;
-            background-size: cover;
-            background-position: center;
-            filter: brightness(.55) saturate(1.2);
-        }
-        .auth-right-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(160deg, rgba(10,22,40,.7) 0%, rgba(30,58,138,.55) 100%);
-        }
-        .auth-right-content {
-            position: relative; z-index: 2;
-            text-align: center; padding: 40px;
-            max-width: 460px;
-        }
-        .auth-right-content h2 {
-            font-size: 2rem; font-weight: 800;
-            color: #fff; margin-bottom: 12px;
-            letter-spacing: -.03em; line-height: 1.2;
-        }
-        .auth-right-content p {
-            color: rgba(255,255,255,.75);
-            font-size: .95rem; line-height: 1.6;
-        }
+        .auth-back:hover { color: var(--c-accent); }
 
-        /* ─── Brand bar ─── */
+        /* Brand */
         .auth-brand {
             display: flex; align-items: center; gap: 10px;
-            margin-bottom: 40px;
+            margin-bottom: 44px;
         }
-        .auth-brand img { height: 40px; width: auto; }
+        .auth-brand img { height: 36px; width: auto; }
         .auth-brand-name {
-            font-size: 1.25rem; font-weight: 800;
-            color: var(--tg-navy); letter-spacing: -.02em;
+            font-family: var(--font-sans);
+            font-size: 15px; font-weight: 700;
+            color: var(--c-ink); letter-spacing: -.01em;
         }
 
-        /* ─── Heading ─── */
-        .auth-heading { margin-bottom: 28px; }
-        .auth-heading h1 {
-            font-size: 1.65rem; font-weight: 800;
-            color: var(--tg-navy); letter-spacing: -.03em;
+        /* Heading */
+        .auth-title {
+            font-family: var(--font-serif);
+            font-size: 28px; font-weight: 400;
+            color: var(--c-ink); line-height: 1.2;
             margin-bottom: 6px;
         }
-        .auth-heading p { font-size: .85rem; color: #6B7280; }
+        .auth-subtitle {
+            font-size: 13.5px; color: var(--c-ink-2);
+            margin-bottom: 32px; line-height: 1.5;
+        }
 
-        /* ─── Form fields ─── */
-        .auth-field { margin-bottom: 16px; }
+        /* Fields */
+        .auth-field { margin-bottom: 18px; }
         .auth-field label {
             display: block;
-            font-size: .8rem; font-weight: 600;
-            color: #374151; margin-bottom: 6px;
+            font-size: 12.5px; font-weight: 600;
+            color: var(--c-ink); margin-bottom: 6px;
+            letter-spacing: .02em; text-transform: uppercase;
         }
-        .auth-field .input-wrap {
-            position: relative;
-        }
-        .auth-field .input-wrap .input-icon {
-            position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
-            color: #9CA3AF; font-size: .95rem; pointer-events: none;
-            transition: color .15s;
+        .auth-field .iw { position: relative; }
+        .auth-field .iw i {
+            position: absolute; left: 13px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--c-ink-3); font-size: 14px;
+            pointer-events: none; transition: color .15s;
         }
         .auth-field input {
             width: 100%;
-            padding: 10px 13px 10px 38px;
-            border: 1.5px solid #E5E7EB;
-            border-radius: 10px;
-            font-size: .875rem;
-            color: #111827;
-            background: #F9FAFB;
+            padding: 10px 14px 10px 38px;
+            border: 1.5px solid var(--c-border);
+            border-radius: var(--r-input);
+            font-family: var(--font-sans);
+            font-size: 14px; color: var(--c-ink);
+            background: var(--c-bg);
             transition: border-color .15s, box-shadow .15s, background .15s;
             outline: none;
-            box-sizing: border-box;
         }
         .auth-field input:focus {
-            border-color: var(--tg-blue);
+            border-color: var(--c-accent);
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
         }
-        .auth-field input::placeholder { color: #C4C9D4; }
-        .auth-field input:focus + .input-icon,
-        .auth-field .input-wrap:focus-within .input-icon { color: var(--tg-blue); }
-        .auth-field .is-invalid { border-color: #EF4444 !important; }
-        .auth-field .invalid-feedback { font-size: .75rem; color: #EF4444; margin-top: 4px; }
+        .auth-field input::placeholder { color: var(--c-ink-3); }
+        .auth-field .iw:focus-within i { color: var(--c-accent); }
+        .auth-field .is-invalid { border-color: var(--c-err) !important; }
+        .auth-field .invalid-feedback,
+        .auth-field small.text-danger {
+            font-size: 12px; color: var(--c-err); margin-top: 4px; display: block;
+        }
 
-        /* ─── Submit button ─── */
+        /* Submit */
         .btn-auth {
-            width: 100%; padding: 12px;
-            background: linear-gradient(135deg, var(--tg-royal), var(--tg-blue));
-            border: none; border-radius: 10px;
-            color: #fff; font-size: .9rem; font-weight: 700;
+            width: 100%;
+            padding: 11px 20px;
+            background: var(--c-accent);
+            border: none; border-radius: var(--r-btn);
+            color: #fff; font-family: var(--font-sans);
+            font-size: 14px; font-weight: 600;
             cursor: pointer; letter-spacing: .01em;
-            box-shadow: 0 4px 16px rgba(59,130,246,.35);
-            transition: transform .15s, box-shadow .15s;
-            margin-top: 8px;
             display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background .15s, transform .1s;
+            margin-top: 10px;
         }
-        .btn-auth:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(59,130,246,.4);
-        }
-        .btn-auth:active { transform: translateY(0); }
+        .btn-auth:hover { background: var(--c-accent-h); transform: translateY(-1px); }
+        .btn-auth:active { transform: none; }
 
-        /* ─── Footer note ─── */
-        .auth-footer {
-            margin-top: 28px; text-align: center;
-            font-size: .8rem; color: #9CA3AF;
+        /* Footer note */
+        .auth-foot {
+            margin-top: 28px; padding-top: 24px;
+            border-top: 1px solid var(--c-border);
+            font-size: 13px; color: var(--c-ink-2); text-align: center;
         }
-        .auth-footer a { color: var(--tg-blue); font-weight: 600; text-decoration: none; }
-        .auth-footer a:hover { text-decoration: underline; }
+        .auth-foot a { color: var(--c-accent); font-weight: 600; text-decoration: none; }
+        .auth-foot a:hover { text-decoration: underline; }
 
-        /* ─── Back link ─── */
-        .auth-back {
-            position: absolute; top: 24px; left: 24px;
-            display: flex; align-items: center; gap: 6px;
-            font-size: .78rem; font-weight: 600; color: #6B7280;
-            text-decoration: none; transition: color .15s;
+        /* Alerts */
+        .auth-alert {
+            padding: 11px 14px; border-radius: var(--r-input);
+            font-size: 13px; margin-bottom: 20px; line-height: 1.5;
         }
-        .auth-back:hover { color: var(--tg-blue); }
+        .auth-alert.danger { background: #FEF2F2; color: var(--c-err); border: 1px solid #FECACA; }
+        .auth-alert.success { background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0; }
 
-        /* ─── Animated dots on right panel ─── */
-        .auth-dots {
-            position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+        /* ── Right pane ── */
+        .auth-visual {
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
         }
-        .auth-dots span {
-            position: absolute; border-radius: 50%;
-            background: rgba(255,255,255,.06);
-            animation: floatDot linear infinite;
+        .auth-visual-bg {
+            position: absolute; inset: 0;
+            background-size: cover; background-position: center;
+            filter: brightness(.5) saturate(1.1);
         }
-        @keyframes floatDot {
-            from { transform: translateY(0) scale(1); opacity: .6; }
-            to   { transform: translateY(-120vh) scale(.4); opacity: 0; }
+        .auth-visual-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(160deg, rgba(10,18,36,.72) 0%, rgba(30,60,130,.5) 100%);
+        }
+        .auth-visual-body {
+            position: relative; z-index: 2;
+            text-align: center; padding: 48px 52px; max-width: 460px;
+        }
+        .auth-visual-icon {
+            width: 56px; height: 56px; border-radius: 16px;
+            background: rgba(255,255,255,.12); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin: 0 auto 28px;
+        }
+        .auth-visual-body h2 {
+            font-family: var(--font-serif);
+            font-size: 30px; font-weight: 400;
+            color: #fff; margin-bottom: 14px;
+            line-height: 1.2; letter-spacing: -.01em;
+        }
+        .auth-visual-body p {
+            color: rgba(255,255,255,.65);
+            font-size: 14px; line-height: 1.7;
+        }
+        .auth-visual-stars {
+            display: flex; gap: 4px; justify-content: center;
+            margin-top: 36px; margin-bottom: 8px;
+        }
+        .auth-visual-stars span { font-size: 16px; }
+        .auth-visual-caption {
+            font-size: 12px; color: rgba(255,255,255,.45); margin-top: 0;
         }
 
-        /* ─── Page fade-in ─── */
-        .auth-left { animation: slideIn .4s ease both; }
-        .auth-right { animation: fadeIn .5s ease .1s both; }
-        @keyframes slideIn {
-            from { opacity:0; transform: translateX(-20px); }
-            to   { opacity:1; transform: translateX(0); }
-        }
-        @keyframes fadeIn {
-            from { opacity:0; } to { opacity:1; }
+        /* ── Responsive ── */
+        @media (max-width: 820px) {
+            .auth-shell { grid-template-columns: 1fr; }
+            .auth-visual { display: none; }
+            .auth-pane { padding: 48px 28px; border-right: none; }
+            .auth-back { left: 28px; }
         }
 
-        /* ─── Responsive ─── */
-        @media (max-width: 768px) {
-            .auth-wrapper { flex-direction: column; }
-            .auth-right { display: none; }
-            .auth-left { width: 100%; padding: 36px 28px; }
+        /* ── Entrance animation ── */
+        .auth-pane  { animation: paneIn .35s ease both; }
+        .auth-visual { animation: fadeIn .4s ease .1s both; }
+        @keyframes paneIn {
+            from { opacity:0; transform:translateX(-16px); }
+            to   { opacity:1; transform:translateX(0); }
         }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
     </style>
 </head>
 
 <body>
-<div class="auth-wrapper">
+<div class="auth-shell">
 
-    {{-- ── Left: Form Panel ── --}}
-    <div class="auth-left">
+    {{-- ── Left: Form pane ── --}}
+    <div class="auth-pane">
 
         <a href="{{ url('/') }}" class="auth-back">
-            <i class="bi bi-arrow-left"></i> Kembali ke Website
+            <i class="bi bi-arrow-left"></i> Kembali
         </a>
 
-        {{-- Brand --}}
         <div class="auth-brand">
             <img src="{{ asset('storage/images/default/' . ($web->site_logo ?? 'site_logo.png')) }}"
                  alt="{{ $web->site_name ?? 'Telegrad' }}">
             <span class="auth-brand-name">{{ $web->site_name ?? 'Telegrad' }}</span>
         </div>
 
-        {{-- Form content from child views --}}
         @yield('content')
 
     </div>
 
-    {{-- ── Right: Visual Panel ── --}}
-    <div class="auth-right">
-        <div class="auth-right-bg"
+    {{-- ── Right: Visual pane ── --}}
+    <div class="auth-visual">
+        <div class="auth-visual-bg"
              style="background-image: url('{{ asset('storage/images/default/' . ($web->slider_1 ?? 'slider_1.jpg')) }}');">
         </div>
-        <div class="auth-right-overlay"></div>
+        <div class="auth-visual-overlay"></div>
 
-        {{-- Floating dots decoration --}}
-        <div class="auth-dots" id="authDots"></div>
-
-        <div class="auth-right-content">
-            <div style="width:64px; height:64px; border-radius:20px;
-                        background:rgba(255,255,255,.15); backdrop-filter:blur(8px);
-                        display:flex; align-items:center; justify-content:center;
-                        margin:0 auto 24px; font-size:1.8rem;">
-                📷
-            </div>
+        <div class="auth-visual-body">
+            <div class="auth-visual-icon">📷</div>
             <h2>{{ $web->site_head ?? 'Abadikan Momen Terbaikmu' }}</h2>
-            <p>{{ $web->site_description ?? 'Jasa foto & video profesional untuk setiap momen berharga dalam hidupmu.' }}</p>
+            <p>{{ $web->site_description ?? 'Jasa foto & video profesional untuk setiap momen berharga.' }}</p>
 
-            <div style="display:flex; gap:10px; justify-content:center; margin-top:32px;">
-                @foreach(['⭐', '⭐', '⭐', '⭐', '⭐'] as $star)
-                <span style="font-size:1.1rem;">{{ $star }}</span>
+            <div class="auth-visual-stars">
+                @foreach(['⭐','⭐','⭐','⭐','⭐'] as $s)
+                    <span>{{ $s }}</span>
                 @endforeach
             </div>
-            <p style="color:rgba(255,255,255,.6); font-size:.8rem; margin-top:8px;">
-                Dipercaya ratusan pelanggan
-            </p>
+            <p class="auth-visual-caption">Dipercaya ratusan pelanggan</p>
         </div>
     </div>
 
@@ -267,21 +263,5 @@
 
 <script src="{{ asset('auth/assets/js/core/popper.min.js') }}"></script>
 <script src="{{ asset('auth/assets/js/core/bootstrap.min.js') }}"></script>
-<script>
-    // Generate floating dots
-    const container = document.getElementById('authDots');
-    for (let i = 0; i < 12; i++) {
-        const dot = document.createElement('span');
-        const size = Math.random() * 80 + 20;
-        dot.style.cssText = `
-            width:${size}px; height:${size}px;
-            left:${Math.random() * 100}%;
-            top:${Math.random() * 100 + 100}%;
-            animation-duration:${Math.random() * 20 + 15}s;
-            animation-delay:${Math.random() * -20}s;
-        `;
-        container.appendChild(dot);
-    }
-</script>
 </body>
 </html>

@@ -27,9 +27,16 @@ class RootController extends Controller
         $data['categories']  = Category::where('is_active', true)->get();
         $data['ratings']     = Rating::with('user', 'order.package')
                                     ->latest()->take(6)->get();
+        // FIX: Ambil 5 paket per kategori agar semua filter di homepage bisa kerja.
+        // Sebelumnya take(6) global menyebabkan 1 kategori mendominasi,
+        // sehingga kategori lain tidak tampil saat di-filter.
         $data['packages']    = Package::with('category')
                                     ->where('is_active', true)
-                                    ->latest()->take(6)->get();
+                                    ->get()
+                                    ->groupBy('category_id')
+                                    ->map(fn($group) => $group->take(5))
+                                    ->flatten()
+                                    ->values();
         $data['portofolios'] = Portofolio::with('category')
                                     ->where('is_active', true)
                                     ->latest()->take(6)->get();

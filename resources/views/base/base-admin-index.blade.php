@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ ($web->site_name ?? 'Telegrad') . ' — ' . ($submenu ?? 'Admin') }}</title>
+
+    <link rel="icon" href="{{ asset('images/logo_telegrad_blue.png') }}" type="image/png">
 
     <!-- Mazer Admin Template -->
     <link rel="stylesheet" href="{{ asset('dist/assets/compiled/css/app.css') }}">
@@ -16,323 +18,938 @@
     <!-- FontAwesome -->
     <link href="{{ asset('root/assets/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
 
-    <!-- Bootstrap Icons -->
+    <!-- Bootstrap Icons (local + CDN fallback) -->
     <link href="{{ asset('root/assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <!-- DataTables -->
     <link rel="stylesheet" href="{{ asset('dist/assets/extensions/simple-datatables/style.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/assets/compiled/css/table-datatable.css') }}">
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* ─── CSS Variables ─────────────────────────────────────── */
+        /* =================================================================
+         *  TELEGRAD ADMIN — Design System v3
+         *  Strategy: load AFTER Mazer, gunakan specificity + !important
+         *  hanya di tempat yang perlu override Mazer.
+         * ================================================================= */
+
+        /* ── 1. CSS Tokens ─────────────────────────────────────────────── */
         :root {
-            --tg-navy:      #0A1628;
-            --tg-royal:     #1E3A8A;
-            --tg-blue:      #3B82F6;
-            --tg-blue-lt:   #EFF6FF;
-            --tg-accent:    #F59E0B;
-            --tg-radius:    12px;
-            --tg-shadow:    0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.04);
-            --tg-font:      'Plus Jakarta Sans', sans-serif;
+            --tg-navy:         #0A1628;
+            --tg-royal:        #1E3A8A;
+            --tg-blue:         #3B82F6;
+            --tg-blue-lt:      #EFF6FF;
+            --tg-blue-lt2:     rgba(59,130,246,0.08);
+            --tg-accent:       #F59E0B;
+
+            --tg-page-bg:      #E8EEF6;
+            --tg-glass:        rgba(255,255,255,0.80);
+            --tg-glass-border: rgba(255,255,255,0.70);
+            --tg-blur:         blur(18px);
+
+            --tg-text:         #0F172A;
+            --tg-text-2:       #475569;
+            --tg-text-3:       #94A3B8;
+            --tg-border:       rgba(0,0,0,0.07);
+
+            --tg-ok-bg:        #D1FAE5; --tg-ok-tx:  #065F46;
+            --tg-warn-bg:      #FEF3C7; --tg-warn-tx: #92400E;
+            --tg-err-bg:       #FEE2E2; --tg-err-tx:  #991B1B;
+            --tg-info-bg:      #DBEAFE; --tg-info-tx: #1E40AF;
+
+            --tg-r-sm:         8px;
+            --tg-r-md:         12px;
+            --tg-r-lg:         16px;
+            --tg-ease:         cubic-bezier(0.4,0,0.2,1);
+            --tg-t:            0.25s;
+
+            --tg-sh-sm:  0 1px 4px rgba(0,0,0,.06);
+            --tg-sh-md:  0 4px 20px rgba(0,0,0,.08);
+            --tg-sh-lg:  0 8px 32px rgba(0,0,0,.10);
+            --tg-sh-blue:0 4px 16px rgba(59,130,246,.28);
+            --tg-sh-navy:0 4px 16px rgba(30,58,138,.28);
+
+            --tg-sidebar-w:    252px;
+            --tg-sidebar-mini: 64px;
+            --tg-topbar-h:     60px;
+            --tg-font:         'Plus Jakarta Sans', sans-serif;
+            --tg-sidebar-bg:   #ffffff;
+            --tg-sidebar-border: rgba(0,0,0,0.07);
         }
 
-        /* ─── Global ─────────────────────────────────────────────── */
-        body, * { font-family: var(--tg-font) !important; }
-
-        /* ─── Page fade-in ───────────────────────────────────────── */
-        #main-content { animation: fadeUp .35s ease both; }
-        @keyframes fadeUp {
-            from { opacity:0; transform:translateY(10px); }
-            to   { opacity:1; transform:translateY(0); }
+        /* Dark mode token overrides */
+        [data-theme="dark"] {
+            --tg-page-bg:      #06101E;
+            --tg-glass:        rgba(10,22,40,0.82);
+            --tg-glass-border: rgba(255,255,255,0.06);
+            --tg-text:         #F1F5F9;
+            --tg-text-2:       #94A3B8;
+            --tg-text-3:       #475569;
+            --tg-border:       rgba(255,255,255,0.07);
+            --tg-blue-lt:      rgba(59,130,246,0.12);
+            --tg-blue-lt2:     rgba(59,130,246,0.07);
+            --tg-ok-bg: rgba(6,95,70,.25);    --tg-ok-tx:  #6EE7B7;
+            --tg-warn-bg:rgba(146,64,14,.25); --tg-warn-tx:#FCD34D;
+            --tg-err-bg: rgba(153,27,27,.25); --tg-err-tx: #FCA5A5;
+            --tg-info-bg:rgba(30,64,175,.25); --tg-info-tx:#93C5FD;
+            --tg-sidebar-bg:   #0D1B2E;
+            --tg-sidebar-border: rgba(255,255,255,0.07);
         }
 
-        /* ─── Sidebar refinements ────────────────────────────────── */
-        #sidebar .sidebar-wrapper {
-            border-right: 1px solid rgba(0,0,0,.06);
-        }
-        .sidebar-header {
-            padding: 18px 20px 14px !important;
-            border-bottom: 1px solid rgba(0,0,0,.06);
+        /* ── 2. Base reset ──────────────────────────────────────────────── */
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--tg-font) !important;
+            background: var(--tg-page-bg) !important;
+            color: var(--tg-text) !important;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Sembunyikan logo bawaan Mazer */
-        .sidebar-header .logo img,
-        .sidebar-header .logo .logo-name,
-        .sidebar-header .logo h5,
-        .sidebar-header .logo span.align-middle {
-            display: none !important;
+        /*
+         * PENTING: JANGAN pakai "body *" untuk font-family karena akan
+         * menimpa font-family milik Bootstrap Icons & FontAwesome —
+         * icon tidak bisa merender glyph-nya jika font-family-nya dioverride.
+         * Terapkan ke elemen teks saja, lindungi pseudo-element icon.
+         */
+        body p, body div, body a, body button, body input, body select,
+        body textarea, body label, body h1, body h2, body h3,
+        body h4, body h5, body h6, body td, body th, body li,
+        body small, body strong, body em, body nav, body header,
+        body footer, body section, body article, body main {
+            font-family: var(--tg-font) !important;
         }
 
-        /* Brand Telegrad */
-        .tg-brand {
-            font-size: 1.25rem;
-            font-weight: 800;
-            letter-spacing: -.02em;
-            line-height: 1;
+        /*
+         * Proteksi icon font — WAJIB ada setelah rule di atas
+         * agar Bootstrap Icons dan FontAwesome tidak tertimpa.
+         */
+        i[class*="bi"],
+        [class*="bi"]::before,
+        [class*="bi"]::after {
+            font-family: "bootstrap-icons" !important;
+        }
+
+        i.fa, i.fas, i.far, i.fal, i.fab, i.fad,
+        i[class*="fa-"],
+        .fa::before, .fas::before, .far::before,
+        .fal::before, .fab::before, i[class*="fa-"]::before {
+            font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", "FontAwesome" !important;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--tg-text-3); border-radius: 99px; }
+
+        /* ── 3. Sidebar ────────────────────────────────────────────────── */
+        #sidebar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: var(--tg-sidebar-w) !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            z-index: 100 !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+            background: var(--tg-sidebar-bg) !important;
+            border-right: 1px solid var(--tg-sidebar-border) !important;
+            transition: width var(--tg-t) var(--tg-ease), transform var(--tg-t) var(--tg-ease) !important;
+        }
+
+        #sidebar .sidebar-wrapper,
+        #sidebar .sidebar-wrapper.active {
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            width: 100% !important;
+            overflow: hidden !important;
+            background: transparent !important;
+            position: static !important;
+            transform: none !important;
+        }
+
+        /* Header sidebar */
+        #sidebar .sidebar-header {
+            flex-shrink: 0 !important;
+            height: var(--tg-topbar-h) !important;
+            min-height: var(--tg-topbar-h) !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 14px !important;
+            gap: 8px !important;
+            margin: 0 !important;
+            border-bottom: 1px solid var(--tg-sidebar-border) !important;
+            background: var(--tg-sidebar-bg) !important;
+        }
+
+        /*
+         * .sidebar-menu: flex:1 + min-height:0 agar mengisi sisa tinggi.
+         * overflow-y diset HANYA via JS (lihat killPerfectScrollbar) karena
+         * Mazer PerfectScrollbar akan override CSS rule biasa dengan inline style.
+         */
+        #sidebar .sidebar-menu {
+            flex: 1 1 0% !important;
+            min-height: 0 !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
+            padding-bottom: 24px !important;
+            scrollbar-width: thin !important;
+            scrollbar-color: rgba(156,163,175,.5) transparent !important;
+        }
+        #sidebar .sidebar-menu::-webkit-scrollbar { width: 3px !important; }
+        #sidebar .sidebar-menu::-webkit-scrollbar-thumb {
+            background: rgba(156,163,175,.5) !important;
+            border-radius: 99px !important;
+        }
+
+        /* Hapus padding/margin berlebih dari Mazer */
+        #sidebar .sidebar-menu > ul,
+        #sidebar .sidebar-menu .menu-inner {
+            padding-top: 4px !important;
+            margin-top: 0 !important;
+        }
+
+        /* Main content offset — smooth transition saat toggle mini */
+        #main, #main.layout-navbar {
+            margin-left: var(--tg-sidebar-w) !important;
+            width: calc(100% - var(--tg-sidebar-w)) !important;
+            min-height: 100vh !important;
+            transition: margin-left var(--tg-t) var(--tg-ease), width var(--tg-t) var(--tg-ease) !important;
+        }
+        body.sidebar-mini #main,
+        body.sidebar-mini #main.layout-navbar {
+            margin-left: var(--tg-sidebar-mini) !important;
+            width: calc(100% - var(--tg-sidebar-mini)) !important;
+        }
+        @media (max-width: 1199.98px) {
+            #main, #main.layout-navbar {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+        }
+
+/* ====== TOPBAR FIX ====== */
+
+/* Dark pill: tinggi konsisten, icon sejajar */
+.tg-dark-pill {
+    height: 34px !important;
+    padding: 0 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    line-height: 1 !important;
+}
+.tg-dark-pill .bi {
+    font-size: 0.88rem !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Burger button legacy — tidak dipakai lagi di topbar */
+.burger-btn { display: none !important; }
+
+/* Tombol buka sidebar mobile di topbar */
+.tg-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--tg-r-sm);
+    border: 1px solid var(--tg-border);
+    background: transparent;
+    color: var(--tg-text-2);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background var(--tg-t), color var(--tg-t);
+}
+.tg-menu-btn:hover {
+    background: var(--tg-blue-lt);
+    color: var(--tg-royal);
+    border-color: rgba(59,130,246,.25);
+}
+.tg-menu-btn i { font-size: 1.25rem; line-height: 1; }
+/* Desktop: sembunyikan — d-xl-none dibantu media query ini */
+@media (min-width: 1200px) {
+    .tg-menu-btn { display: none !important; }
+}
+
+        /* Brand TG kustom */
+        .tg-brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            overflow: hidden;
+            flex: 1;
+            min-width: 0;
             text-decoration: none !important;
-            display: inline-block;
         }
-        .tg-brand .tele { color: #000000 !important; }
-        .tg-brand .grad { color: #1f81cd !important; }
-        .dark .tg-brand .tele { color: #f1f5f9 !important; }
-        .dark .tg-brand .grad { color: #1f81cd !important; }
 
-        /* Sidebar menu items */
-        .sidebar-item .sidebar-link {
-            border-radius: 10px !important;
-            margin: 2px 8px !important;
-            padding: 9px 14px !important;
-            transition: background .18s, color .18s, transform .15s !important;
-            font-size: .84rem !important;
-            font-weight: 500 !important;
+        .tg-brand-icon {
+            width: 34px; height: 34px;
+            border-radius: var(--tg-r-sm);
+            background: linear-gradient(135deg, var(--tg-navy), var(--tg-royal));
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 12px; font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: var(--tg-sh-navy);
+        }
+
+        .tg-brand-text {
+            font-size: 1.12rem !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.025em !important;
+            line-height: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            color: var(--tg-text) !important;
+            opacity: 1;
+            transition: opacity var(--tg-t) var(--tg-ease);
+        }
+        .tg-brand-text .tele { color: var(--tg-text) !important; }
+        .tg-brand-text .grad { color: var(--tg-blue) !important; }
+
+        /* Toggle sidebar desktop */
+        .tg-toggle-btn {
+            width: 30px; height: 30px;
+            border: 1px solid var(--tg-border);
+            background: transparent !important;
+            border-radius: var(--tg-r-sm);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--tg-text-3);
+            flex-shrink: 0;
+            transition: background var(--tg-t), color var(--tg-t), border-color var(--tg-t);
+        }
+        .tg-toggle-btn:hover {
+            background: var(--tg-blue-lt) !important;
+            color: var(--tg-royal) !important;
+            border-color: rgba(59,130,246,.25) !important;
+        }
+        .tg-toggle-btn svg { transition: transform var(--tg-t) var(--tg-ease); }
+
+        /* State: mini sidebar */
+        body.sidebar-mini #sidebar { width: var(--tg-sidebar-mini) !important; }
+        body.sidebar-mini .tg-brand-text { opacity: 0 !important; pointer-events: none; }
+        body.sidebar-mini #sidebar .sidebar-section-title { opacity: 0 !important; }
+        body.sidebar-mini #sidebar .sidebar-item .sidebar-link span:not(.menu-badge) { opacity: 0 !important; width: 0 !important; overflow: hidden; }
+        body.sidebar-mini #sidebar .sidebar-item .menu-badge { opacity: 0 !important; }
+        body.sidebar-mini .tg-toggle-btn svg { transform: rotate(180deg); }
+        /* margin-left main saat mini sudah dihandle di blok #main di atas */
+
+        /* Tooltip saat mini */
+        body.sidebar-mini #sidebar .sidebar-item { position: relative; }
+        body.sidebar-mini #sidebar .sidebar-item .sidebar-link::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: calc(var(--tg-sidebar-mini) - 4px);
+            top: 50%; transform: translateY(-50%);
+            background: var(--tg-navy); color: #fff;
+            font-size: 0.72rem !important; font-weight: 600 !important;
+            padding: 5px 12px; border-radius: var(--tg-r-sm);
+            white-space: nowrap; pointer-events: none;
+            opacity: 0; z-index: 999;
+            box-shadow: var(--tg-sh-md);
+            transition: opacity 0.15s;
+        }
+        body.sidebar-mini #sidebar .sidebar-item .sidebar-link:hover::after { opacity: 1; }
+
+        /* ── 3b. Sidebar section title ── */
+        #sidebar .sidebar-title {
+            font-size: 0.62rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.10em !important;
+            text-transform: uppercase !important;
+            color: var(--tg-text-3) !important;
+            padding: 10px 20px 4px !important; /* turun dari 16px → 10px */
+            white-space: nowrap;
+            transition: opacity var(--tg-t);
+        }
+        /* Khusus section title pertama: lebih dekat ke header */
+        #sidebar .sidebar-menu > ul > li:first-child .sidebar-title,
+        #sidebar .sidebar-menu .menu-inner > .sidebar-title:first-child {
+            padding-top: 8px !important;
+        }
+
+        /* ── 3c. Sidebar menu links ── */
+        #sidebar .sidebar-item > .sidebar-link,
+        #sidebar .sidebar-item > a.sidebar-link {
             display: flex !important;
             align-items: center !important;
             gap: 10px !important;
+            border-radius: var(--tg-r-sm) !important;
+            margin: 2px 8px !important;
+            padding: 9px 13px !important;
+            font-size: 0.82rem !important;
+            font-weight: 500 !important;
+            color: var(--tg-text-2) !important;
+            text-decoration: none !important;
+            white-space: nowrap;
+            overflow: hidden;
+            transition:
+                background var(--tg-t) var(--tg-ease),
+                color var(--tg-t) var(--tg-ease),
+                transform 0.15s var(--tg-ease),
+                box-shadow var(--tg-t) var(--tg-ease) !important;
         }
-        .sidebar-item .sidebar-link i {
-            font-family: "Font Awesome 6 Free" !important;
-            font-weight: 900 !important;
-            font-style: normal !important;
-            -webkit-font-smoothing: antialiased !important;
-            display: inline-block !important;
-            width: 16px !important;
-            text-align: center !important;
-            font-size: .88rem !important;
-            flex-shrink: 0 !important;
-            color: #94a3b8 !important;
-            transition: color .15s !important;
-        }
-        .sidebar-item .sidebar-link:hover {
+
+        #sidebar .sidebar-item > .sidebar-link:hover,
+        #sidebar .sidebar-item > a.sidebar-link:hover {
             background: var(--tg-blue-lt) !important;
             color: var(--tg-royal) !important;
             transform: translateX(2px);
         }
-        .sidebar-item .sidebar-link:hover i { color: var(--tg-royal) !important; }
-        .sidebar-item.active > .sidebar-link {
+
+        /* Active */
+        #sidebar .sidebar-item.active > .sidebar-link,
+        #sidebar .sidebar-item.active > a.sidebar-link {
             background: linear-gradient(135deg, var(--tg-navy), var(--tg-royal)) !important;
             color: #fff !important;
-            box-shadow: 0 4px 14px rgba(30,58,138,.25) !important;
+            box-shadow: var(--tg-sh-navy) !important;
         }
-        .sidebar-item.active > .sidebar-link i,
-        .sidebar-item.active > .sidebar-link svg { color: #fff !important; }
 
-        /* Sidebar section title */
-        .sidebar-title {
-            font-size: .67rem !important;
+        /* Icon di dalam link */
+        #sidebar .sidebar-item .sidebar-link i,
+        #sidebar .sidebar-item .sidebar-link svg {
+            font-size: 0.875rem !important;
+            width: 18px !important; min-width: 18px !important;
+            text-align: center !important;
+            flex-shrink: 0 !important;
+            color: inherit !important;
+            opacity: 0.70;
+            transition: opacity var(--tg-t);
+        }
+        #sidebar .sidebar-item:hover .sidebar-link i,
+        #sidebar .sidebar-item.active .sidebar-link i { opacity: 1; }
+
+        /* Badge counter */
+        #sidebar .sidebar-link .menu-badge {
+            font-size: 0.60rem !important;
             font-weight: 700 !important;
-            letter-spacing: .09em !important;
-            text-transform: uppercase !important;
-            padding: 16px 22px 5px !important;
-            color: #94a3b8 !important;
+            padding: 2px 7px !important;
+            border-radius: 99px !important;
+            background: var(--tg-accent) !important;
+            color: #fff !important;
+            margin-left: auto;
+            flex-shrink: 0;
+            transition: opacity var(--tg-t);
         }
 
-        /* ─── Topbar ─────────────────────────────────────────────── */
-        /* FIXED: dihapus karakter Arab yang corrupt di baris sebelumnya */
-        .navbar-top {
-            backdrop-filter: blur(12px);
-            background: rgba(255,255,255,.9) !important;
-            border-bottom: 1px solid rgba(0,0,0,.07);
-            box-shadow: none !important;
-            padding: 10px 20px !important;
-        }
-        .dark .navbar-top {
-            background: rgba(18,28,54,.9) !important;
-            border-bottom-color: rgba(255,255,255,.07);
+        /* Stagger animation initial state */
+        #sidebar .sidebar-item {
+            opacity: 0;
+            transform: translateX(-8px);
         }
 
-        /* ─── Topbar — user avatar ───────────────────────────────── */
-        .avatar.avatar-md img {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--tg-blue-lt);
-            box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+        /* ── 4. Main layout adjust — lihat seksi 3 di atas ─────────────── */
+        /* (sudah di-handle di blok sidebar, tidak perlu duplikasi) */
+
+        /* ── 5. Topbar — full glass override ────────────────────────────── */
+        .navbar.navbar-top,
+        header .navbar-top {
+            height: var(--tg-topbar-h) !important;
+            background: var(--tg-glass) !important;
+            backdrop-filter: var(--tg-blur) !important;
+            -webkit-backdrop-filter: var(--tg-blur) !important;
+            border-bottom: 1px solid var(--tg-glass-border) !important;
+            box-shadow: 0 1px 0 var(--tg-border) !important;
+            padding: 0 24px !important;
+            position: sticky !important;
+            top: 0;
+            z-index: 101 !important; /* di atas overlay (z:99) dan sidebar (z:100) */
         }
-        .user-name h6 { font-size: .84rem !important; font-weight: 600 !important; }
-        .user-name p  { font-size: .72rem !important; }
 
-        /* ─── Topbar notification bell ───────────────────────────── */
-        .nav-link .bi-bell { transition: transform .2s; }
-        .nav-link:hover .bi-bell { transform: rotate(-15deg) scale(1.15); }
+        /* Burger */
+        /* (dihandle di .tg-menu-btn di atas) */
 
-        /* ─── User menu pill ─────────────────────────────────────── */
-        .user-menu {
-            border-radius: 12px;
-            border: 1px solid rgba(0,0,0,.08);
-            transition: background .15s;
-            cursor: pointer;
-        }
-        .user-menu:hover { background: #F9FAFB !important; }
-        .dark .user-menu { border-color: rgba(255,255,255,.08); }
-        .dark .user-menu:hover { background: rgba(255,255,255,.06) !important; }
-
-        /* Notif hover bg */
-        .notif-btn { border-radius: 10px; transition: background .15s; }
-        .notif-btn:hover { background: #F3F4F6 !important; }
-        .dark .notif-btn:hover { background: rgba(255,255,255,.08) !important; }
-
-        /* ─── Page heading ───────────────────────────────────────── */
-        .page-heading { padding: 24px 28px 12px !important; }
-        .page-title h3 {
-            font-size: 1.35rem !important;
-            font-weight: 800 !important;
-            letter-spacing: -.02em;
-            margin-bottom: 2px;
-        }
-        .page-title .text-subtitle { font-size: .8rem !important; }
-
-        /* ─── Breadcrumb ─────────────────────────────────────────── */
-        .breadcrumb-item a { font-size: .78rem; font-weight: 500; color: var(--tg-blue); }
-        .breadcrumb-item.active { font-size: .78rem; }
-
-        /* ─── Card global ────────────────────────────────────────── */
-        .card {
-            border: 1px solid rgba(0,0,0,.07) !important;
-            border-radius: var(--tg-radius) !important;
-            box-shadow: var(--tg-shadow) !important;
-            transition: box-shadow .2s;
-        }
-        .card:hover { box-shadow: 0 4px 24px rgba(0,0,0,.09) !important; }
-        .card-header {
-            border-bottom: 1px solid rgba(0,0,0,.06) !important;
-            padding: 16px 20px !important;
+        /* Notifikasi bell — presisi center, hapus caret Bootstrap */
+        .tg-nav-btn {
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: var(--tg-r-sm) !important;
+            border: 1px solid var(--tg-border) !important;
             background: transparent !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: var(--tg-text-2) !important;
+            cursor: pointer !important;
+            position: relative !important;
+            text-decoration: none !important;
+            transition: background var(--tg-t), color var(--tg-t), border-color var(--tg-t) !important;
+            padding: 0 !important;
+            line-height: 1 !important;
+        }
+        /* Hapus caret bawaan Bootstrap dropdown-toggle */
+        .tg-nav-btn.dropdown-toggle::after { display: none !important; }
+        .tg-nav-btn:hover {
+            background: var(--tg-blue-lt) !important;
+            color: var(--tg-royal) !important;
+            border-color: rgba(59,130,246,.25) !important;
+        }
+        .tg-nav-btn .bi-bell {
+            font-size: 1rem !important;
+            line-height: 1 !important;
+            transition: transform 0.2s var(--tg-ease);
+        }
+        .tg-nav-btn:hover .bi-bell { transform: rotate(-12deg) scale(1.1); }
+        .tg-notif-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #EF4444; border: 1.5px solid white;
+            position: absolute; top: 7px; right: 7px;
+        }
+
+        /* Dark toggle pill */
+        .tg-dark-pill {
+            display: flex; align-items: center; gap: 7px;
+            padding: 5px 12px;
+            border-radius: 99px;
+            border: 1px solid var(--tg-border);
+            background: transparent;
+            cursor: pointer;
+            color: var(--tg-text-2);
+            font-size: 0.78rem;
+            transition: background var(--tg-t), border-color var(--tg-t);
+        }
+        .tg-dark-pill:hover {
+            background: var(--tg-blue-lt);
+            border-color: rgba(59,130,246,.25);
+        }
+        .tg-dark-pill .bi { font-size: 0.92rem; }
+
+        /* User chip */
+        .tg-user-chip {
+            display: flex; align-items: center; gap: 8px;
+            padding: 4px 10px 4px 4px;
+            border-radius: 99px;
+            border: 1px solid var(--tg-border);
+            background: transparent;
+            cursor: pointer;
+            text-decoration: none !important;
+            transition: background var(--tg-t), border-color var(--tg-t);
+        }
+        /* Hapus caret Bootstrap dropdown-toggle */
+        .tg-user-chip.dropdown-toggle::after { display: none !important; }
+        .tg-user-chip:hover {
+            background: var(--tg-blue-lt);
+            border-color: rgba(59,130,246,.25);
+        }
+        .tg-user-chip .tg-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--tg-blue-lt);
+            box-shadow: 0 0 0 2px rgba(59,130,246,.15);
+            flex-shrink: 0;
+        }
+        .tg-user-chip .tg-uname {
+            font-size: 0.80rem !important; font-weight: 700 !important;
+            color: var(--tg-text) !important; line-height: 1.2;
+        }
+        .tg-user-chip .tg-urole {
+            font-size: 0.68rem !important;
+            color: var(--tg-text-3) !important; line-height: 1.2;
+        }
+        @media (max-width: 767px) {
+            .tg-user-meta { display: none !important; }
+        }
+
+        /* Dropdown */
+        .dropdown-menu {
+            border-radius: var(--tg-r-md) !important;
+            border: 1px solid var(--tg-border) !important;
+            box-shadow: var(--tg-sh-lg) !important;
+            background: var(--tg-glass) !important;
+            backdrop-filter: var(--tg-blur) !important;
+            -webkit-backdrop-filter: var(--tg-blur) !important;
+            padding: 6px !important;
+            animation: tgDrop 0.18s var(--tg-ease) both;
+        }
+        @keyframes tgDrop {
+            from { opacity:0; transform:translateY(-6px) scale(0.98); }
+            to   { opacity:1; transform:translateY(0)   scale(1); }
+        }
+        .dropdown-item {
+            border-radius: var(--tg-r-sm) !important;
+            font-size: 0.80rem !important;
+            font-weight: 500 !important;
+            padding: 8px 12px !important;
+            color: var(--tg-text) !important;
+            transition: background 0.12s !important;
+        }
+        .dropdown-item:hover,
+        .dropdown-item:focus {
+            background: var(--tg-blue-lt) !important;
+            color: var(--tg-royal) !important;
+        }
+        .dropdown-item.text-danger { color: #DC2626 !important; }
+        .dropdown-item.text-danger:hover {
+            background: var(--tg-err-bg) !important;
+            color: var(--tg-err-tx) !important;
+        }
+        .dropdown-header {
+            font-size: 0.62rem !important; font-weight: 700 !important;
+            letter-spacing: 0.08em !important; text-transform: uppercase !important;
+            color: var(--tg-text-3) !important;
+            padding: 6px 12px 4px !important;
+        }
+        .dropdown-divider { border-color: var(--tg-border) !important; margin: 4px 0 !important; }
+
+        /* ── 6. Page content ────────────────────────────────────────────── */
+        #main-content { animation: tgUp 0.32s var(--tg-ease) both; }
+        @keyframes tgUp {
+            from { opacity:0; transform:translateY(12px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        .page-heading { padding: 24px 28px 10px !important; }
+
+        /* .page-title legacy — kept for backward compat */
+        .page-title h3 {
+            font-size: 1.25rem !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.025em !important;
+            color: var(--tg-text) !important;
+        }
+        .page-title .text-subtitle,
+        .page-title p.text-muted {
+            font-size: 0.78rem !important;
+            color: var(--tg-text-2) !important;
+        }
+
+        /* ── Page header bar (title kiri + breadcrumb kanan) ── */
+        .tg-page-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tg-page-bar-left { flex: 1; min-width: 0; }
+        .tg-page-bar-right { flex-shrink: 0; }
+
+        .tg-page-title {
+            font-size: 1.25rem !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.025em !important;
+            color: var(--tg-text) !important;
+            margin: 0 !important;
+            line-height: 1.2 !important;
+        }
+        .tg-page-desc {
+            font-size: 0.78rem !important;
+            color: var(--tg-text-2) !important;
+            margin: 3px 0 0 !important;
+            line-height: 1.4 !important;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            flex-wrap: nowrap !important;
+        }
+        .breadcrumb-item {
+            display: flex !important;
+            align-items: center !important;
+            line-height: 1 !important;
+        }
+        .breadcrumb-item a {
+            font-size: 0.76rem !important;
+            font-weight: 500 !important;
+            color: var(--tg-blue) !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            line-height: 1 !important;
+        }
+        .breadcrumb-item a i {
+            font-size: 0.80rem !important;
+            line-height: 1 !important;
+            position: relative !important;
+            top: 0 !important;
+        }
+        .breadcrumb-item a:hover { color: var(--tg-royal) !important; }
+        .breadcrumb-item.active {
+            font-size: 0.76rem !important;
+            font-weight: 500 !important;
+            color: var(--tg-text-2) !important;
+            line-height: 1 !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            color: var(--tg-text-3) !important;
+            font-size: 0.76rem !important;
+            line-height: 1 !important;
+            display: flex !important;
+            align-items: center !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        @media (max-width: 576px) {
+            .tg-page-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .tg-page-bar-right { align-self: flex-start; }
+        }
+
+        /* ── 7. Cards ───────────────────────────────────────────────────── */
+        .card {
+            background: var(--tg-glass) !important;
+            backdrop-filter: var(--tg-blur) !important;
+            -webkit-backdrop-filter: var(--tg-blur) !important;
+            border: 1px solid var(--tg-glass-border) !important;
+            border-radius: var(--tg-r-lg) !important;
+            box-shadow: var(--tg-sh-sm) !important;
+            transition: box-shadow var(--tg-t) var(--tg-ease),
+                        transform var(--tg-t) var(--tg-ease) !important;
+        }
+        .card:hover {
+            box-shadow: var(--tg-sh-md) !important;
+            transform: translateY(-2px);
+        }
+        .card-header {
+            background: transparent !important;
+            border-bottom: 1px solid var(--tg-border) !important;
+            padding: 16px 20px !important;
         }
         .card-header .card-title {
-            font-size: .95rem !important;
-            font-weight: 700 !important;
-            letter-spacing: -.01em;
+            font-size: 0.92rem !important; font-weight: 700 !important;
+            color: var(--tg-text) !important;
         }
         .card-body { padding: 20px !important; }
 
-        /* ─── Buttons ────────────────────────────────────────────── */
+        /* ── 8. Stat cards (Mazer widget override) ──────────────────────── */
+        .stats-icon,
+        .card .stats-icon {
+            border-radius: var(--tg-r-md) !important;
+        }
+
+        /* ── 9. Buttons ─────────────────────────────────────────────────── */
         .btn {
-            border-radius: 8px !important;
+            border-radius: var(--tg-r-sm) !important;
             font-weight: 600 !important;
-            font-size: .8rem !important;
-            transition: all .18s !important;
+            font-size: 0.80rem !important;
+            transition: all 0.18s var(--tg-ease) !important;
         }
         .btn-primary {
             background: linear-gradient(135deg, var(--tg-royal), var(--tg-blue)) !important;
             border: none !important;
-            box-shadow: 0 4px 12px rgba(59,130,246,.3) !important;
+            color: #fff !important;
+            box-shadow: var(--tg-sh-blue) !important;
         }
-        .btn-primary:hover {
+        .btn-primary:hover, .btn-primary:focus {
             transform: translateY(-1px) !important;
-            box-shadow: 0 6px 18px rgba(59,130,246,.4) !important;
+            box-shadow: 0 6px 20px rgba(59,130,246,.40) !important;
+            background: linear-gradient(135deg, var(--tg-navy), var(--tg-blue)) !important;
         }
         .btn-primary:active { transform: translateY(0) !important; }
+        .btn-danger {
+            background: #DC2626 !important; border: none !important;
+            box-shadow: 0 4px 12px rgba(220,38,38,.25) !important;
+        }
+        .btn-danger:hover { transform: translateY(-1px) !important; }
+        .btn-light, .btn-outline-primary {
+            background: transparent !important;
+            border: 1px solid var(--tg-border) !important;
+            color: var(--tg-text-2) !important;
+        }
+        .btn-light:hover, .btn-outline-primary:hover {
+            background: var(--tg-blue-lt) !important;
+            border-color: rgba(59,130,246,.25) !important;
+            color: var(--tg-royal) !important;
+        }
 
-        /* ─── Tables ─────────────────────────────────────────────── */
+        /* Icon buttons (edit, view, delete) */
+        .btn-icon {
+            width: 32px !important; height: 32px !important;
+            padding: 0 !important;
+            display: inline-flex !important; align-items: center !important;
+            justify-content: center !important;
+            border-radius: var(--tg-r-sm) !important;
+            border: 1px solid var(--tg-border) !important;
+            background: transparent !important;
+            color: var(--tg-text-2) !important;
+            font-size: 0.82rem !important;
+            transition: all 0.15s !important;
+        }
+        .btn-icon:hover { transform: scale(1.08) !important; }
+        .btn-icon.btn-warning { border-color: rgba(245,158,11,.3) !important; color: #D97706 !important; }
+        .btn-icon.btn-warning:hover { background: var(--tg-warn-bg) !important; }
+        .btn-icon.btn-success { border-color: rgba(16,185,129,.3) !important; color: #059669 !important; }
+        .btn-icon.btn-success:hover { background: var(--tg-ok-bg) !important; }
+        .btn-icon.btn-danger  { border-color: rgba(220,38,38,.3)  !important; color: #DC2626 !important; box-shadow: none !important; }
+        .btn-icon.btn-danger:hover  { background: var(--tg-err-bg) !important; }
+
+        /* ── 10. Tables ─────────────────────────────────────────────────── */
         .table thead th {
-            font-size: .70rem !important;
-            font-weight: 700 !important;
-            text-transform: uppercase !important;
-            letter-spacing: .07em !important;
-            color: #6B7280 !important;
-            padding: 12px 14px !important;
-            border-bottom: 2px solid #F3F4F6 !important;
+            font-size: 0.66rem !important; font-weight: 700 !important;
+            text-transform: uppercase !important; letter-spacing: 0.08em !important;
+            color: var(--tg-text-3) !important;
+            padding: 12px 16px !important;
+            border-bottom: 1px solid var(--tg-border) !important;
+            background: transparent !important;
             white-space: nowrap;
         }
         .table tbody td {
-            padding: 12px 14px !important;
+            padding: 12px 16px !important;
             vertical-align: middle !important;
-            font-size: .84rem !important;
-            border-bottom: 1px solid #F9FAFB !important;
+            font-size: 0.82rem !important;
+            color: var(--tg-text) !important;
+            border-bottom: 1px solid var(--tg-border) !important;
         }
-        .table-hover tbody tr { transition: background .12s; }
-        .table-hover tbody tr:hover { background: #FAFBFF !important; }
+        .table tbody tr:last-child td { border-bottom: none !important; }
+        .table-hover tbody tr { transition: background 0.12s; }
+        .table-hover tbody tr:hover { background: var(--tg-blue-lt2) !important; }
 
-        /* ─── Badges ─────────────────────────────────────────────── */
+        /* ── 11. Badges ─────────────────────────────────────────────────── */
         .badge {
-            font-size: .70rem !important;
-            font-weight: 600 !important;
-            padding: 4px 10px !important;
-            border-radius: 100px !important;
+            font-size: 0.67rem !important; font-weight: 700 !important;
+            padding: 4px 10px !important; border-radius: 99px !important;
+            letter-spacing: 0.02em;
         }
+        .badge.bg-success, .badge-success { background: var(--tg-ok-bg)   !important; color: var(--tg-ok-tx)   !important; }
+        .badge.bg-warning, .badge-warning { background: var(--tg-warn-bg) !important; color: var(--tg-warn-tx) !important; }
+        .badge.bg-danger,  .badge-danger  { background: var(--tg-err-bg)  !important; color: var(--tg-err-tx)  !important; }
+        .badge.bg-info,    .badge-info    { background: var(--tg-info-bg) !important; color: var(--tg-info-tx) !important; }
+        .badge.bg-primary, .badge-primary { background: var(--tg-blue-lt) !important; color: var(--tg-royal)   !important; }
+        .badge.bg-secondary              { background: rgba(100,116,139,.12) !important; color: var(--tg-text-2) !important; }
 
-        /* ─── Form controls ──────────────────────────────────────── */
+        /* ── 12. Form controls ──────────────────────────────────────────── */
         .form-control, .form-select {
-            border-radius: 8px !important;
-            font-size: .84rem !important;
-            border-color: #E5E7EB !important;
+            border-radius: var(--tg-r-sm) !important;
+            font-size: 0.82rem !important;
+            border: 1px solid rgba(0,0,0,0.10) !important;
+            background: rgba(255,255,255,0.70) !important;
+            color: var(--tg-text) !important;
             padding: 9px 13px !important;
-            transition: border-color .15s, box-shadow .15s !important;
+            transition: border-color 0.15s, box-shadow 0.15s !important;
         }
+        [data-theme="dark"] .form-control,
+        [data-theme="dark"] .form-select {
+            background: rgba(15,23,42,0.50) !important;
+            border-color: rgba(255,255,255,0.10) !important;
+        }
+        .form-control::placeholder { color: var(--tg-text-3) !important; }
         .form-control:focus, .form-select:focus {
             border-color: var(--tg-blue) !important;
             box-shadow: 0 0 0 3px rgba(59,130,246,.15) !important;
+            outline: none !important;
         }
         .form-label {
-            font-size: .82rem !important;
-            font-weight: 600 !important;
-            color: #374151 !important;
-            margin-bottom: 5px !important;
+            font-size: 0.80rem !important; font-weight: 600 !important;
+            color: var(--tg-text-2) !important; margin-bottom: 5px !important;
         }
 
-        /* ─── Footer ─────────────────────────────────────────────── */
-        footer .footer {
-            font-size: .78rem !important;
-            padding: 14px 28px !important;
-            border-top: 1px solid rgba(0,0,0,.06);
-        }
-
-        /* ─── Dark mode overrides ────────────────────────────────── */
-        .dark .card { border-color: rgba(255,255,255,.07) !important; }
-        .dark .table thead th {
-            border-bottom-color: rgba(255,255,255,.08) !important;
-            color: #9CA3AF !important;
-        }
-        .dark .table tbody td { border-bottom-color: rgba(255,255,255,.04) !important; }
-        .dark .form-control, .dark .form-select {
-            border-color: rgba(255,255,255,.12) !important;
-            background: rgba(255,255,255,.04) !important;
-            color: #f1f5f9 !important;
-        }
-        .dark .form-label { color: #CBD5E1 !important; }
-        .dark .table-hover tbody tr:hover { background: rgba(255,255,255,.03) !important; }
-
-        /* ─── Dropdown ───────────────────────────────────────────── */
-        .dropdown-menu {
-            border-radius: 12px !important;
-            border: 1px solid rgba(0,0,0,.08) !important;
-            box-shadow: 0 8px 30px rgba(0,0,0,.12) !important;
-            padding: 6px !important;
-            animation: dropIn .18s ease;
-        }
-        @keyframes dropIn {
-            from { opacity:0; transform:translateY(-6px); }
-            to   { opacity:1; transform:translateY(0); }
-        }
-        .dropdown-item {
-            border-radius: 8px !important;
-            font-size: .82rem !important;
-            font-weight: 500 !important;
-            padding: 8px 12px !important;
-            transition: background .12s !important;
-        }
-
-        /* ─── Alert ──────────────────────────────────────────────── */
+        /* ── 13. Alerts ─────────────────────────────────────────────────── */
         .alert {
-            border-radius: 10px !important;
-            font-size: .84rem !important;
-            border: none !important;
+            border-radius: var(--tg-r-md) !important;
+            font-size: 0.82rem !important; border: none !important;
+        }
+        .alert-success { background: var(--tg-ok-bg)   !important; color: var(--tg-ok-tx)   !important; }
+        .alert-warning { background: var(--tg-warn-bg) !important; color: var(--tg-warn-tx) !important; }
+        .alert-danger  { background: var(--tg-err-bg)  !important; color: var(--tg-err-tx)  !important; }
+        .alert-info    { background: var(--tg-info-bg) !important; color: var(--tg-info-tx) !important; }
+
+        /* ── 14. Footer ─────────────────────────────────────────────────── */
+        footer .footer {
+            font-size: 0.76rem !important; padding: 14px 28px !important;
+            border-top: 1px solid var(--tg-border) !important;
+            color: var(--tg-text-3) !important;
+            background: transparent !important;
         }
 
-        /* ─── Scrollbar ──────────────────────────────────────────── */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
-
-        /* ─── Responsive page heading padding ────────────────────── */
-        @media (max-width: 767.98px) {
-            .page-heading { padding: 16px 16px 8px !important; }
+        /* ── 15. Mobile overlay ─────────────────────────────────────────── */
+        .tg-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.40);
+            z-index: 99; /* di bawah sidebar (100) dan topbar (101) */
+            /* TIDAK pakai backdrop-filter — itu yang bikin konten blur */
         }
+        .tg-overlay.active { display: block; }
+
+        /* ── Override PerfectScrollbar Mazer di sidebar ── */
+        /* Mazer load PS dan set overflow:hidden — kita paksa balik */
+        #sidebar .sidebar-menu.ps,
+        #sidebar .sidebar-menu.ps--active-y {
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+        /* Sembunyikan rail PS di sidebar */
+        #sidebar .ps__rail-x,
+        #sidebar .ps__rail-y { display: none !important; }
+
+        /* ── Mobile: sidebar drawer ─────────────────────────────────────── */
+        @media (max-width: 1199.98px) {
+            #sidebar {
+                transform: translateX(-100%) !important;
+                width: var(--tg-sidebar-w) !important;
+                box-shadow: none !important;
+                transition: transform var(--tg-t) var(--tg-ease), box-shadow var(--tg-t) var(--tg-ease) !important;
+            }
+            #sidebar.sidebar-open {
+                transform: translateX(0) !important;
+                box-shadow: var(--tg-sh-lg) !important;
+            }
+        }
+
+        /* ── 16. Dark mode explicit overrides (sidebar + page) ──────────── */
+        /* Body & page background */
+        [data-theme="dark"] body {
+            background: var(--tg-page-bg) !important;
+        }
+
+        /* Topbar dark */
+        [data-theme="dark"] .navbar.navbar-top,
+        [data-theme="dark"] header .navbar-top {
+            background: rgba(13,27,46,0.90) !important;
+            border-bottom-color: rgba(255,255,255,0.07) !important;
+        }
+
+        /* Sidebar text dark */
+        [data-theme="dark"] #sidebar .sidebar-title { color: var(--tg-text-3) !important; }
+        [data-theme="dark"] #sidebar .sidebar-item > .sidebar-link,
+        [data-theme="dark"] #sidebar .sidebar-item > a.sidebar-link {
+            color: var(--tg-text-2) !important;
+        }
+        [data-theme="dark"] #sidebar .sidebar-item > .sidebar-link:hover,
+        [data-theme="dark"] #sidebar .sidebar-item > a.sidebar-link:hover {
+            background: rgba(59,130,246,0.12) !important;
+            color: #93C5FD !important;
+        }
+        [data-theme="dark"] #sidebar .sidebar-item.active > .sidebar-link,
+        [data-theme="dark"] #sidebar .sidebar-item.active > a.sidebar-link {
+            background: linear-gradient(135deg, var(--tg-navy), var(--tg-royal)) !important;
+            color: #fff !important;
+        }
+
+        /* Cards dark */
+        [data-theme="dark"] .card {
+            background: rgba(13,27,46,0.85) !important;
+            border-color: rgba(255,255,255,0.07) !important;
+        }
+
+        /* Dropdown dark */
+        [data-theme="dark"] .dropdown-menu {
+            background: rgba(13,27,46,0.96) !important;
+            border-color: rgba(255,255,255,0.08) !important;
+        }
+        [data-theme="dark"] .dropdown-item { color: var(--tg-text-2) !important; }
+        [data-theme="dark"] .dropdown-item:hover { background: rgba(59,130,246,0.15) !important; color: #93C5FD !important; }
     </style>
 
     @yield('custom-css')
@@ -340,139 +957,166 @@
 
 <body>
     @include('sweetalert::alert')
-    <script src="{{ asset('dist/assets/static/js/initTheme.js') }}"></script>
+
+    {{-- Anti-flash: terapkan tema sebelum paint pertama --}}
+    <script>
+        (function(){
+            var t = localStorage.getItem('tg-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', t);
+            /* dark class on body diterapkan via applyTheme() setelah DOMContentLoaded */
+            if (localStorage.getItem('tg-sidebar-mini') === '1') {
+                document.documentElement.classList.add('sidebar-mini-pending');
+            }
+        })();
+    </script>
+
+    <div class="tg-overlay" id="tgOverlay" onclick="closeMobile()"></div>
 
     <div id="app">
 
-        {{-- ======= SIDEBAR ======= --}}
+        {{-- ============================================================ --}}
+        {{-- SIDEBAR                                                        --}}
+        {{-- ============================================================ --}}
         <div id="sidebar">
             <div class="sidebar-wrapper active">
 
-                <div class="sidebar-header position-relative">
-                    <div class="d-flex justify-content-between align-items-center">
+                {{-- Header --}}
+                <div class="sidebar-header">
 
-                        {{-- Logo / Brand --}}
-                        <div class="logo">
-                            <a href="{{ route('admin.dashboard') }}" class="tg-brand">
-                                <span class="tele">Tele</span><span class="grad">grad</span>
-                            </a>
-                        </div>
+                    {{-- Brand --}}
+                    <a href="{{ route('admin.dashboard') }}" class="tg-brand-wrap">
+                        <div class="tg-brand-icon">TG</div>
+                        <span class="tg-brand-text">
+                            <span class="tele">Tele</span><span class="grad">grad</span>
+                        </span>
+                    </a>
 
-                        {{-- Dark Mode Toggle --}}
-                        <div class="theme-toggle d-flex gap-2 align-items-center">
-                            {{-- Sun icon --}}
-                            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16" viewBox="0 0 21 21">
-                                <g fill="none" fill-rule="evenodd" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M10.5 14.5c2.219 0 4-1.763 4-3.982a4.003 4.003 0 0 0-4-4.018c-2.219 0-4 1.781-4 4c0 2.219 1.781 4 4 4zM4.136 4.136L5.55 5.55m9.9 9.9l1.414 1.414M1.5 10.5h2m14 0h2M4.135 16.863L5.55 15.45m9.899-9.9l1.414-1.415M10.5 19.5v-2m0-14v-2" opacity=".4"/>
-                                </g>
-                            </svg>
-                            <div class="form-check form-switch mb-0">
-                                <input class="form-check-input me-0" type="checkbox" id="toggle-dark"
-                                       style="cursor:pointer; width:34px; height:18px;">
-                            </div>
-                            {{-- Moon icon --}}
-                            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24">
-                                <path fill="currentColor" d="m17.75 4.09l-2.53 1.94l.91 3.06l-2.63-1.81l-2.63 1.81l.91-3.06l-2.53-1.94L12.44 4l1.06-3l1.06 3l3.19.09m3.5 6.91l-1.64 1.25l.59 1.98l-1.7-1.17l-1.7 1.17l.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95l2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85c-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14c.4-.4.82-.76 1.27-1.08c.75-.53 1.93.36 1.85 1.19c-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82c-2.81 3.14-2.7 7.96.31 10.98c3.02 3.01 7.84 3.12 10.98.31Z" opacity=".7"/>
-                            </svg>
-                        </div>
+                    {{-- Desktop: collapse/expand sidebar --}}
+                    <button class="tg-toggle-btn d-none d-xl-flex"
+                            id="btnSidebarToggle"
+                            onclick="toggleMini()"
+                            aria-label="Toggle sidebar">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
 
-                        {{-- Mobile close button --}}
-                        <div class="sidebar-toggler x">
-                            <a href="#" class="sidebar-hide d-xl-none d-block">
-                                <i class="bi bi-x bi-middle"></i>
-                            </a>
-                        </div>
+                    {{-- Mobile: tutup sidebar drawer --}}
+                    <button class="tg-toggle-btn d-xl-none"
+                            onclick="closeMobile()"
+                            aria-label="Tutup menu">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
 
-                    </div>
                 </div>
 
+                {{-- Menu --}}
                 <div class="sidebar-menu">
                     @include('admin.sidebar')
                 </div>
 
             </div>
         </div>
-        {{-- End Sidebar --}}
+        {{-- /SIDEBAR --}}
 
-        {{-- ======= MAIN ======= --}}
+        {{-- ============================================================ --}}
+        {{-- MAIN                                                           --}}
+        {{-- ============================================================ --}}
         <div id="main" class="layout-navbar navbar-fixed">
 
             {{-- Topbar --}}
             <header>
                 <nav class="navbar navbar-expand navbar-light navbar-top">
-                    <div class="container-fluid">
+                    <div class="container-fluid gap-2">
 
-                        {{-- Burger / toggle sidebar --}}
-                        <a href="#" class="burger-btn d-block">
-                            <i class="bi bi-justify fs-3"></i>
-                        </a>
+                        {{-- Tombol buka sidebar (mobile only) --}}
+                        <button class="tg-menu-btn d-xl-none"
+                                onclick="openMobile()"
+                                aria-label="Buka menu">
+                            <i class="bi bi-list"></i>
+                        </button>
 
-                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                            <ul class="navbar-nav ms-auto mb-lg-0 align-items-center gap-1">
+                        <div class="flex-grow-1"></div>
 
-                                {{-- Notifikasi --}}
-                                <li class="nav-item dropdown me-1 position-relative">
-                                    <a class="nav-link dropdown-toggle text-gray-600 p-2 notif-btn"
-                                       href="#" data-bs-toggle="dropdown">
-                                        <i class="bi bi-bell fs-5"></i>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" style="min-width:220px;">
-                                        <li>
-                                            <h6 class="dropdown-header" style="font-size:.72rem; letter-spacing:.05em;">
-                                                NOTIFIKASI
-                                            </h6>
-                                        </li>
-                                        <li>
-                                            <span class="dropdown-item text-muted" style="cursor:default;">
-                                                <i class="bi bi-inbox me-2 opacity-50"></i>Tidak ada notifikasi baru
-                                            </span>
-                                        </li>
-                                    </ul>
-                                </li>
+                        <div class="d-flex align-items-center gap-2">
 
-                            </ul>
+                            {{-- Dark Mode Toggle --}}
+                            <button class="tg-dark-pill d-none d-md-flex"
+                                    onclick="toggleDark()"
+                                    id="btnDark"
+                                    aria-label="Toggle dark mode">
+                                <i class="bi bi-sun" id="tgIconSun"></i>
+                                <i class="bi bi-moon d-none" id="tgIconMoon"></i>
+                            </button>
 
-                            {{-- User Dropdown --}}
-                            <div class="dropdown ms-2">
-                                <a href="#" data-bs-toggle="dropdown" style="text-decoration:none;">
-                                    <div class="user-menu d-flex align-items-center gap-2 px-2 py-1">
-                                        <div class="user-name text-end d-none d-md-block">
-                                            <h6 class="mb-0">{{ Auth::user()->name }}</h6>
-                                            <p class="mb-0 text-muted">Administrator</p>
-                                        </div>
-                                        <div class="avatar avatar-md">
-                                            <img src="{{ asset('storage/images/profile/' . (Auth::user()->photo ?? 'default.jpg')) }}"
-                                                 alt="{{ Auth::user()->name }}"
-                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                            {{-- Fallback avatar jika gambar gagal load --}}
-                                            <div style="display:none; width:38px; height:38px; border-radius:50%;
-                                                        background:#EFF6FF; border:2px solid #BFDBFE;
-                                                        align-items:center; justify-content:center;
-                                                        font-weight:700; font-size:.85rem; color:#1E3A8A;">
-                                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                            </div>
-                                        </div>
+                            {{-- Notifikasi --}}
+                            <div class="dropdown">
+                                <a href="#" class="tg-nav-btn dropdown-toggle"
+                                   data-bs-toggle="dropdown"
+                                   aria-label="Notifikasi">
+                                    <i class="bi bi-bell fs-6"></i>
+                                    <span class="tg-notif-dot"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" style="min-width:240px;">
+                                    <li><h6 class="dropdown-header">Notifikasi</h6></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="bi bi-inbox me-2 opacity-50"></i>
+                                            Tidak ada notifikasi baru
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            {{-- User --}}
+                            <div class="dropdown">
+                                <a href="#" class="tg-user-chip dropdown-toggle"
+                                   data-bs-toggle="dropdown"
+                                   aria-label="Menu pengguna">
+                                    <img class="tg-avatar"
+                                         src="{{ asset('storage/images/profile/' . (Auth::user()->photo ?? 'default.jpg')) }}"
+                                         alt="{{ Auth::user()->name }}"
+                                         onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=1E3A8A&color=fff&size=64'">
+                                    <div class="tg-user-meta">
+                                        <div class="tg-uname">{{ Auth::user()->name }}</div>
+                                        <div class="tg-urole">Administrator</div>
                                     </div>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" style="min-width:12rem;">
+                                <ul class="dropdown-menu dropdown-menu-end" style="min-width:14rem;">
                                     <li>
-                                        <div class="px-3 py-2 mb-1">
-                                            <div style="font-size:.82rem; font-weight:700;">{{ Auth::user()->name }}</div>
-                                            <div style="font-size:.72rem; color:#9CA3AF;">Administrator</div>
+                                        <div class="px-3 py-2">
+                                            <div style="font-size:.82rem;font-weight:700;color:var(--tg-text);">{{ Auth::user()->name }}</div>
+                                            <div style="font-size:.70rem;color:var(--tg-text-3);">Administrator</div>
                                         </div>
                                     </li>
-                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a class="dropdown-item" href="{{ route('admin.profile') }}">
-                                            <i class="bi bi-person me-2 text-primary"></i> Profil Saya
+                                            <i class="bi bi-person me-2 opacity-75"></i>Profil Saya
                                         </a>
                                     </li>
-                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <li class="d-md-none">
+                                        <a class="dropdown-item" href="#" onclick="toggleDark();return false;">
+                                            <i class="bi bi-moon me-2 opacity-75"></i>Dark Mode
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a class="dropdown-item text-danger" href="#" onclick="logoutAdmin(event)">
-                                            <i class="bi bi-box-arrow-left me-2"></i> Keluar
+                                            <i class="bi bi-box-arrow-left me-2"></i>Keluar
                                         </a>
-                                        <form id="logout-form-admin" action="{{ route('admin.logout') }}" method="POST" style="display:none;">
+                                        <form id="logout-form-admin"
+                                              action="{{ route('admin.logout') }}"
+                                              method="POST" style="display:none;">
                                             @csrf
                                         </form>
                                     </li>
@@ -487,25 +1131,28 @@
             {{-- Page Content --}}
             <div id="main-content">
                 <div class="page-heading">
-                    <div class="page-title">
-                        <div class="row align-items-center mb-3">
-                            <div class="col-12 col-md-6 order-md-1 order-last">
-                                <h3 class="mb-0">{{ $submenu ?? '' }}</h3>
-                                <p class="text-subtitle text-muted mb-0 mt-1">{{ $subdesc ?? '' }}</p>
-                            </div>
-                            <div class="col-12 col-md-6 order-md-2 order-first">
-                                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
-                                    <ol class="breadcrumb mb-0" style="background:none; padding:0;">
-                                        <li class="breadcrumb-item">
-                                            <a href="{{ route('admin.dashboard') }}">
-                                                <i class="bi bi-house-door me-1"></i>{{ $menu ?? 'Dashboard' }}
-                                            </a>
-                                        </li>
-                                        <li class="breadcrumb-item active">{{ $submenu ?? '' }}</li>
-                                    </ol>
-                                </nav>
-                            </div>
+
+                    {{-- ── Page header bar ── --}}
+                    <div class="tg-page-bar">
+                        <div class="tg-page-bar-left">
+                            <h3 class="tg-page-title">{{ $submenu ?? '' }}</h3>
+                            @if(!empty($subdesc))
+                            <p class="tg-page-desc">{{ $subdesc }}</p>
+                            @endif
                         </div>
+                        <nav aria-label="breadcrumb" class="tg-page-bar-right">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item">
+                                    <a href="{{ route('admin.dashboard') }}">
+                                        <i class="bi bi-house-door"></i>
+                                        <span>{{ $menu ?? 'Dashboard' }}</span>
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    {{ $submenu ?? '' }}
+                                </li>
+                            </ol>
+                        </nav>
                     </div>
 
                     @yield('content')
@@ -515,13 +1162,13 @@
 
             {{-- Footer --}}
             <footer>
-                <div class="footer clearfix mb-0 text-muted">
+                <div class="footer clearfix mb-0">
                     <div class="float-start">
                         <p class="mb-0">&copy; {{ date('Y') }} {{ $web->site_name ?? 'Telegrad' }}</p>
                     </div>
                     <div class="float-end">
                         <p class="mb-0">
-                            Crafted with <span class="text-danger"><i class="bi bi-heart-fill"></i></span>
+                            Crafted with <span style="color:#EF4444;"><i class="bi bi-heart-fill"></i></span>
                             by Telegrad Team
                         </p>
                     </div>
@@ -529,13 +1176,20 @@
             </footer>
 
         </div>
-        {{-- End Main --}}
+        {{-- /MAIN --}}
 
     </div>
 
     <!-- Scripts -->
-    <script src="{{ asset('dist/assets/static/js/components/dark.js') }}"></script>
     <script src="{{ asset('dist/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
+    {{-- Stub PerfectScrollbar SEBELUM app.js load agar Mazer tidak init PS --}}
+    <script>
+        window.PerfectScrollbar = function() {
+            return { update: function(){}, destroy: function(){} };
+        };
+        window.PerfectScrollbar.prototype = { update: function(){}, destroy: function(){} };
+        if (window.ps !== undefined) { window.ps = null; }
+    </script>
     <script src="{{ asset('dist/assets/compiled/js/app.js') }}"></script>
     <script src="{{ asset('vendor/sweetalerts2/sweetalerts2.min.js') }}"></script>
     <script src="{{ asset('vendor/sweetalerts2/custom-sweetalert.js') }}"></script>
@@ -543,7 +1197,123 @@
     <script src="{{ asset('dist/assets/static/js/pages/simple-datatables.js') }}"></script>
 
     <script>
-        // ── Logout confirmation ─────────────────────────────────────────────
+        /* =============================================================
+         *  Telegrad Admin — Core UI Logic
+         * ============================================================= */
+
+        const KEY_THEME = 'tg-theme';
+        const KEY_MINI  = 'tg-sidebar-mini';
+
+        /* ── Dark Mode ─────────────────────────────────────────────── */
+        function applyTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            if (document.body) document.body.classList.toggle('dark', t === 'dark');
+            localStorage.setItem(KEY_THEME, t);
+            var sun  = document.getElementById('tgIconSun');
+            var moon = document.getElementById('tgIconMoon');
+            if (sun && moon) {
+                sun.classList.toggle('d-none', t === 'dark');
+                moon.classList.toggle('d-none', t !== 'dark');
+            }
+        }
+
+        function toggleDark() {
+            var cur = document.documentElement.getAttribute('data-theme') || 'light';
+            applyTheme(cur === 'dark' ? 'light' : 'dark');
+        }
+
+        /* ── Sidebar Desktop Mini ──────────────────────────────────── */
+        function toggleMini() {
+            var isMini = document.body.classList.toggle('sidebar-mini');
+            localStorage.setItem(KEY_MINI, isMini ? '1' : '0');
+        }
+
+        /* ── Sidebar Mobile ────────────────────────────────────────── */
+        function openMobile() {
+            document.getElementById('sidebar').classList.add('sidebar-open');
+            document.getElementById('tgOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        /* Burger: di desktop toggle mini, di mobile buka drawer */
+        function handleBurger() {
+            if (window.innerWidth >= 1200) {
+                toggleMini();   /* fungsi ini sudah ada */
+            } else {
+                openMobile();   /* fungsi ini sudah ada */
+            }
+        }
+
+        function closeMobile() {
+            document.getElementById('sidebar').classList.remove('sidebar-open');
+            document.getElementById('tgOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        /* ── Init on DOMContentLoaded ───────────────────────────────── */
+        document.addEventListener('DOMContentLoaded', function () {
+            /* Tema */
+            applyTheme(localStorage.getItem(KEY_THEME) || 'light');
+
+            /* Sidebar mini: restore dari localStorage */
+            if (localStorage.getItem(KEY_MINI) === '1') {
+                document.body.classList.add('sidebar-mini');
+            }
+
+            /* Stagger sidebar items */
+            document.querySelectorAll('#sidebar .sidebar-item').forEach(function (el, i) {
+                setTimeout(function () {
+                    el.style.transition = 'opacity .22s ease, transform .22s ease';
+                    el.style.opacity    = '1';
+                    el.style.transform  = 'translateX(0)';
+                }, i * 28);
+            });
+
+            /* Jalankan kill PS pertama kali */
+            killPerfectScrollbar();
+        });
+
+        /* ── Kill PerfectScrollbar (cleanup setelah Mazer init) ───── */
+        function killPerfectScrollbar() {
+            var menu = document.querySelector('#sidebar .sidebar-menu');
+            if (!menu) return;
+
+            /* Hapus class PS */
+            menu.classList.remove('ps', 'ps--active-y', 'ps--active-x');
+
+            /* Hapus elemen rail PS */
+            menu.querySelectorAll('.ps__rail-x, .ps__rail-y').forEach(function(r){ r.remove(); });
+
+            /* Set overflow langsung via inline style (lebih kuat dari !important CSS) */
+            menu.style.cssText += '; overflow-y: auto !important; overflow-x: hidden !important;';
+
+            /* MutationObserver sebagai jaring pengaman terakhir */
+            if (menu._tgObserver) menu._tgObserver.disconnect();
+            menu._tgObserver = new MutationObserver(function(muts) {
+                muts.forEach(function(m) {
+                    if (m.attributeName === 'style') {
+                        var s = menu.style;
+                        if (s.overflow === 'hidden' || s.overflowY === 'hidden') {
+                            menu.style.setProperty('overflow-y', 'auto', 'important');
+                            menu.style.setProperty('overflow-x', 'hidden', 'important');
+                        }
+                    }
+                    if (m.attributeName === 'class') {
+                        menu.classList.remove('ps', 'ps--active-y', 'ps--active-x');
+                    }
+                });
+            });
+            menu._tgObserver.observe(menu, { attributes: true, attributeFilter: ['style', 'class'] });
+        }
+
+        /* Jalankan di DOMContentLoaded + load + delay berlapis */
+        document.addEventListener('DOMContentLoaded', function(){ setTimeout(killPerfectScrollbar, 0); });
+        window.addEventListener('load', function(){
+            killPerfectScrollbar();
+            setTimeout(killPerfectScrollbar, 100);
+            setTimeout(killPerfectScrollbar, 500);
+        });
+
+        /* ── SweetAlert Logout ─────────────────────────────────────── */
         function logoutAdmin(event) {
             event.preventDefault();
             Swal.fire({
@@ -555,14 +1325,14 @@
                 cancelButtonText: 'Batal',
                 reverseButtons: true,
                 confirmButtonColor: '#1E3A8A',
-            }).then((result) => {
-                if (result.isConfirmed) {
+            }).then(function (r) {
+                if (r.isConfirmed) {
                     document.getElementById('logout-form-admin').submit();
                 }
             });
         }
 
-        // ── Delete confirmation ─────────────────────────────────────────────
+        /* ── SweetAlert Delete ─────────────────────────────────────── */
         function deleteData(id) {
             Swal.fire({
                 title: 'Hapus data ini?',
@@ -572,26 +1342,13 @@
                 confirmButtonText: 'Ya, Hapus',
                 cancelButtonText: 'Batal',
                 reverseButtons: true,
-                confirmButtonColor: '#dc3545',
-            }).then((result) => {
-                if (result.isConfirmed) {
+                confirmButtonColor: '#DC2626',
+            }).then(function (r) {
+                if (r.isConfirmed) {
                     document.getElementById('delete-form-' + id).submit();
                 }
             });
         }
-
-        // ── Staggered sidebar animation on load ─────────────────────────────
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.sidebar-item').forEach((el, i) => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateX(-8px)';
-                el.style.transition = `opacity .25s ease ${i * 0.03}s, transform .25s ease ${i * 0.03}s`;
-                requestAnimationFrame(() => {
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateX(0)';
-                });
-            });
-        });
     </script>
 
     @yield('custom-js')

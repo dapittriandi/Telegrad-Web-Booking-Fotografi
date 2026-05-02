@@ -1,60 +1,68 @@
 @extends('base.base-auth-index')
 
 @section('content')
-<div class="card card-plain">
 
-    <div class="card-header pb-0 text-start">
-        <h4 class="font-weight-bolder">{{ $submenu ?? 'Login Admin' }}</h4>
-        <p class="mb-0 text-sm text-muted">{{ $subdesc ?? 'Masukkan kredensial admin kamu' }}</p>
-    </div>
+<div class="auth-title">{{ $submenu ?? 'Selamat datang' }}</div>
+<p class="auth-subtitle">{{ $subdesc ?? 'Masukkan kredensial admin kamu untuk melanjutkan.' }}</p>
 
-    <div class="card-body">
-        <form action="{{ route('admin.login.post') }}" method="POST">
-            @csrf
-
-            <div class="form-group mb-3">
-                <label class="form-label">Email atau Username</label>
-                <input
-                    type="text"
-                    class="form-control @error('login') is-invalid @enderror"
-                    name="login"
-                    value="{{ old('login') }}"
-                    placeholder="Masukkan email atau username..."
-                    autofocus>
-                @error('login')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-group mb-3">
-                <label class="form-label">Password</label>
-                <input
-                    type="password"
-                    class="form-control @error('password') is-invalid @enderror"
-                    name="password"
-                    placeholder="Masukkan password...">
-                @error('password')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="text-center mt-4">
-                <button type="submit" class="btn btn-lg btn-primary w-100">
-                    <i class="bi bi-box-arrow-in-right me-2"></i> Masuk
-                </button>
-            </div>
-
-        </form>
-    </div>
-
-    <div class="card-footer text-center pt-0 px-lg-2 px-1">
-        <p class="mb-0 text-sm mx-auto text-muted">
-            Lupa password?
-            <a href="javascript:;" class="text-primary font-weight-bold">
-                Hubungi superadmin
-            </a>
-        </p>
-    </div>
-
+{{-- Error / success alerts --}}
+@if($errors->any())
+<div class="auth-alert danger">
+    @foreach($errors->all() as $error)
+        <div>{{ $error }}</div>
+    @endforeach
 </div>
+@endif
+
+@if(session('success'))
+<div class="auth-alert success">{{ session('success') }}</div>
+@endif
+
+<form action="{{ route('admin.login.post') }}" method="POST" novalidate>
+    @csrf
+
+    <div class="auth-field">
+        <label for="login">Email atau Username</label>
+        <div class="iw">
+            <i class="bi bi-person"></i>
+            <input
+                type="text"
+                id="login"
+                name="login"
+                value="{{ old('login') }}"
+                placeholder="Masukkan email atau username"
+                class="{{ $errors->has('login') ? 'is-invalid' : '' }}"
+                autofocus>
+        </div>
+        @error('login')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="auth-field">
+        <label for="password">Password</label>
+        <div class="iw">
+            <i class="bi bi-lock"></i>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Masukkan password"
+                class="{{ $errors->has('password') ? 'is-invalid' : '' }}">
+        </div>
+        @error('password')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <button type="submit" class="btn-auth">
+        <i class="bi bi-box-arrow-in-right"></i> Masuk
+    </button>
+</form>
+
+<div class="auth-foot">
+    Lupa password?
+    <a href="javascript:;">Hubungi superadmin</a>
+</div>
+
 @endsection
