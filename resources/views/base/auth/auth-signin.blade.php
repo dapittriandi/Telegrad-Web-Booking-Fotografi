@@ -63,9 +63,7 @@
                 class="{{ $errors->has('password') ? 'is-invalid' : '' }}"
                 autocomplete="current-password">
             {{-- Toggle visibility --}}
-            <button type="button" class="pwd-toggle" id="pwdToggle" tabindex="-1" title="Tampilkan password">
-                <i class="bi bi-eye" id="pwdIcon"></i>
-            </button>
+            
         </div>
         @error('password')
             <div class="invalid-feedback">{{ $message }}</div>

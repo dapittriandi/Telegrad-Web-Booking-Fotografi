@@ -6,7 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ ($web->site_name ?? 'Telegrad') . ' — ' . ($submenu ?? 'Admin') }}</title>
 
-    <link rel="icon" href="{{ asset('images/logo_telegrad_blue.png') }}" type="image/png">
+    <link rel="icon" type="image/x-icon"    href="{{ asset('images/telegrad_black.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/telegrad_black.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/telegrad_black.png') }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('images/telegrad_black.png') }}">
+    <link rel="icon" type="image/svg+xml"   href="{{ asset('images/telegrad_black.png') }}">
 
     <!-- Mazer Admin Template -->
     <link rel="stylesheet" href="{{ asset('dist/assets/compiled/css/app.css') }}">

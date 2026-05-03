@@ -7,8 +7,12 @@
     <title>{{ isset($title) ? $title . ' — ' : '' }}{{ $web->site_name ?? config('app.name', 'Telegrad') }}</title>
     <meta name="description" content="{{ $web->site_description ?? 'Jasa foto & video wisuda profesional di Jambi' }}">
 
-<link rel="icon" href="{{ asset('images/logo_telegrad_gold.png') }}" type="image/png">
 
+    <link rel="icon" type="image/x-icon"    href="{{ asset('images/telegrad_gold.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/telegrad_gold.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/telegrad_gold.png') }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('images/telegrad_gold.png') }}">
+    <link rel="icon" type="image/svg+xml"   href="{{ asset('images/telegrad_gold.png') }}">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
