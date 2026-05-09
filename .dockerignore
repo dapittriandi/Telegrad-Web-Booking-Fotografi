@@ -1,0 +1,10 @@
+node_modules
+.git
+storage/logs/*.log
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+public/hot
+.env
+*.md
+tests/
