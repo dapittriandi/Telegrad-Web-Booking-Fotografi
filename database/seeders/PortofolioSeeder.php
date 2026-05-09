@@ -14,21 +14,21 @@ class PortofolioSeeder extends Seeder
         $yudisium = Category::where('slug', 'yudisium')->first();
         $sidang = Category::where('slug', 'after-sidang')->first();
 
-        Portofolio::create([
+        Portofolio::firstOrCreate([
             'category_id' => $wisuda->id,
             'title' => 'Wisuda UIN 2026',
             'image' => 'portfolio1.jpg',
             'description' => 'Dokumentasi wisuda terbaik'
         ]);
 
-        Portofolio::create([
+        Portofolio::firstOrCreate([
             'category_id' => $yudisium->id,
             'title' => 'Yudisium Session',
             'image' => 'portfolio2.jpg',
             'description' => 'Dokumentasi yudisium mahasiswa'
         ]);
 
-        Portofolio::create([
+        Portofolio::firstOrCreate([
             'category_id' => $sidang->id,
             'title' => 'After Sidang Session',
             'image' => 'portfolio3.jpg',

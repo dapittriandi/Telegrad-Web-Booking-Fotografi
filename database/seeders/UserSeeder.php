@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
     {
         $now = Carbon::now();
 
-        User::create([
+        User::firstOrCreate([
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
             'phone' => '089712345678',
@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
             'updated_at'   => $now,
         ]);
 
-        User::create([
+        User::firstOrCreate([
             'name' => 'Customer',
             'email' => 'customer@gmail.com',
             'phone' => '089612345679',

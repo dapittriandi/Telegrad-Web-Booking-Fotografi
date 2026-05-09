@@ -12,7 +12,7 @@ class CategorySeeder extends Seeder
     {
         $now = Carbon::now();
 
-        DB::table('categories')->insert([
+        DB::table('categories')->insertOrIgnore([
             [
                 'name' => 'Wisuda',
                 'slug' => 'wisuda',

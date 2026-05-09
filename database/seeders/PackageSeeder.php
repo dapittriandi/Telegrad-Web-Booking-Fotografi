@@ -42,7 +42,7 @@ class PackageSeeder extends Seeder
     private function insertPackages($categoryId, $packages, $now)
     {
         foreach ($packages as $pkg) {
-            DB::table('packages')->insert([
+            DB::table('packages')->insertOrIgnore([
                 'category_id' => $categoryId,
                 'name' => $pkg['name'],
                 'price' => $pkg['price'],
