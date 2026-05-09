@@ -3,316 +3,376 @@
 @push('css')
 <style>
 /* ══════════════════════════════════════════════════════════════
-   PAYMENT PAGE — Telegrad Luxury Dark
-   Inherits CSS vars dari base-root-index:
-   --gold, --gold-light, --gold-dim, --gold-border,
-   --bg, --surface, --card, --text, --muted, --border,
-   --success, --danger
+   PAYMENT PAGE — Telegrad Premium v2
+   Konsisten dengan checkout page (Cormorant Garamond + Sora)
 ══════════════════════════════════════════════════════════════ */
 
-/* ── Page wrapper ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Sora:wght@300;400;500;600;700&display=swap');
+
+/* ── Variables ────────────────────────────────────────────── */
+:root {
+    --gold:         #c8a96e;
+    --gold-light:   #e0c88a;
+    --gold-dim:     rgba(200,169,110,.07);
+    --gold-border:  rgba(200,169,110,.22);
+    --surface:      #111111;
+    --card:         #161616;
+    --border:       rgba(255,255,255,.07);
+    --text:         #f0ece4;
+    --muted:        #7a7570;
+    --success:      #4caf82;
+    --danger:       #e05c5c;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body:    'Sora', system-ui, sans-serif;
+    --font-mono:    'DM Mono', 'Courier New', monospace;
+    --ease-out:     cubic-bezier(.22,1,.36,1);
+    --ease-spring:  cubic-bezier(.34,1.56,.64,1);
+    --radius-sm:    10px;
+    --radius-md:    16px;
+    --radius-lg:    22px;
+}
+[data-theme="light"] {
+    --surface:  #f5f3ef;
+    --card:     #ffffff;
+    --border:   rgba(0,0,0,.08);
+    --text:     #1a1714;
+    --muted:    #8a8078;
+}
+
+/* ── Page Shell ───────────────────────────────────────────── */
 .py-page {
     min-height: 100vh;
-    padding: 100px 0 80px;
-    background: var(--bg);
+    padding: 104px 0 80px;
+    background: var(--surface);
     position: relative;
-    overflow: hidden;
+    font-family: var(--font-body);
 }
-.py-page::before {
-    content: '';
+
+/* Ambient orbs */
+.py-orb {
     position: fixed;
-    top: -10%; left: -10%;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+.py-orb-1 {
+    width: 600px; height: 600px;
+    top: -15%; left: -12%;
+    background: radial-gradient(circle, rgba(200,169,110,.05) 0%, transparent 65%);
+    animation: pyOrb1 20s ease-in-out infinite alternate;
+}
+.py-orb-2 {
     width: 500px; height: 500px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(200,169,110,.035) 0%, transparent 70%);
-    pointer-events: none; z-index: 0;
+    bottom: 5%; right: -10%;
+    background: radial-gradient(circle, rgba(200,169,110,.04) 0%, transparent 65%);
+    animation: pyOrb2 24s ease-in-out infinite alternate;
 }
-.py-page::after {
-    content: '';
-    position: fixed;
-    bottom: 5%; right: -8%;
-    width: 420px; height: 420px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(200,169,110,.025) 0%, transparent 70%);
-    pointer-events: none; z-index: 0;
+@keyframes pyOrb1 {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(30px,-30px) scale(1.06); }
 }
-.py-page .container { position: relative; z-index: 1; }
+@keyframes pyOrb2 {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(-25px,35px) scale(1.04); }
+}
+.py-page > .container { position: relative; z-index: 1; }
 
 /* ── Progress Steps ───────────────────────────────────────── */
 .py-steps {
     display: flex;
     align-items: center;
     margin-bottom: 48px;
+    animation: pyFadeUp .65s var(--ease-out) both;
 }
 .py-step {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
 }
 .py-step-num {
-    width: 32px; height: 32px;
+    width: 34px; height: 34px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: .72rem; font-weight: 700;
+    font-size: .7rem; font-weight: 700;
+    font-family: var(--font-body);
     border: 1.5px solid rgba(255,255,255,.1);
     color: var(--muted);
-    transition: all .3s;
+    transition: all .4s var(--ease-spring);
 }
+[data-theme="light"] .py-step-num { border-color: rgba(0,0,0,.15); }
 .py-step-label {
-    font-size: .72rem; font-weight: 600;
-    letter-spacing: .08em; text-transform: uppercase;
-    color: var(--muted);
+    font-size: .67rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); transition: color .3s;
 }
 .py-step.is-done .py-step-num {
     background: var(--success); color: #fff;
     border-color: var(--success);
-    box-shadow: 0 0 0 4px rgba(76,175,130,.15);
+    box-shadow: 0 0 0 5px rgba(76,175,130,.1);
 }
 .py-step.is-done .py-step-label { color: var(--success); }
 .py-step.is-active .py-step-num {
-    background: var(--gold); color: #0d0d0d;
+    background: var(--gold); color: #0d0a06;
     border-color: var(--gold);
-    box-shadow: 0 0 0 4px rgba(200,169,110,.15);
+    box-shadow: 0 0 0 5px rgba(200,169,110,.12), 0 4px 16px rgba(200,169,110,.25);
 }
 .py-step.is-active .py-step-label { color: var(--gold-light); }
 
 .py-step-track {
-    flex: 1; height: 1px;
+    flex: 1; height: 1px; margin: 0 12px;
     background: rgba(255,255,255,.08);
-    margin: 0 14px;
-    position: relative; overflow: hidden;
+    position: relative; overflow: hidden; border-radius: 1px;
 }
+[data-theme="light"] .py-step-track { background: rgba(0,0,0,.12); }
 .py-step-track.is-done::after {
     content: '';
     position: absolute; inset: 0;
-    background: var(--success);
+    background: linear-gradient(90deg, var(--success), #6fcfa0);
 }
 
 /* ── Page Header ──────────────────────────────────────────── */
-.py-header { margin-bottom: 36px; }
+.py-header {
+    margin-bottom: 36px;
+    animation: pyFadeUp .65s var(--ease-out) .08s both;
+}
 .py-eyebrow {
-    display: inline-flex;
-    align-items: center; gap: 7px;
-    font-size: .65rem; font-weight: 700;
-    letter-spacing: .16em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: .63rem; font-weight: 600;
+    letter-spacing: .18em; text-transform: uppercase;
     color: var(--gold);
     border: 1px solid var(--gold-border);
-    background: var(--gold-dim);
-    padding: 5px 14px; border-radius: 100px;
+    padding: 5px 15px; border-radius: 100px;
     margin-bottom: 16px;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
+    background: var(--gold-dim);
 }
 .py-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.5rem, 2.8vw, 2rem);
-    font-weight: 700; letter-spacing: -.02em;
-    color: var(--text); line-height: 1.2;
-    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    font-weight: 600; letter-spacing: -.01em;
+    color: var(--text); line-height: 1.15; margin: 0 0 10px;
 }
+.py-title em { font-style: italic; color: var(--gold); font-weight: 400; }
 .py-desc {
-    font-size: .875rem; color: var(--muted);
-    line-height: 1.7; max-width: 480px; margin: 0;
+    font-size: .84rem; color: var(--muted);
+    line-height: 1.75; max-width: 460px; margin: 0; font-weight: 300;
 }
 
-/* ── Alert ────────────────────────────────────────────────── */
+/* ── Alerts ───────────────────────────────────────────────── */
 .py-alert {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 14px 18px; border-radius: 12px;
-    font-size: .83rem; line-height: 1.6;
+    display: flex; align-items: flex-start; gap: 13px;
+    padding: 15px 20px; border-radius: var(--radius-md);
+    font-size: .82rem; line-height: 1.65;
     margin-bottom: 24px;
-    animation: pyAlertIn .3s ease both;
-}
-@keyframes pyAlertIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    animation: pyFadeUp .4s var(--ease-out) both;
+    backdrop-filter: blur(8px);
 }
 .py-alert-icon { flex-shrink: 0; font-size: 1rem; margin-top: 1px; }
 .py-alert.is-error {
-    background: rgba(224,92,92,.08);
-    border: 1px solid rgba(224,92,92,.25);
-    color: #f08080;
+    background: rgba(224,92,92,.07);
+    border: 1px solid rgba(224,92,92,.2); color: #f08080;
 }
 .py-alert.is-error .py-alert-icon { color: var(--danger); }
 .py-alert.is-success {
-    background: rgba(76,175,130,.08);
-    border: 1px solid rgba(76,175,130,.25);
-    color: #7de0b4;
+    background: rgba(76,175,130,.07);
+    border: 1px solid rgba(76,175,130,.2); color: #7de0b4;
 }
 .py-alert.is-success .py-alert-icon { color: var(--success); }
 
-/* ── Form Cards ───────────────────────────────────────────── */
+/* ── Cards ────────────────────────────────────────────────── */
 .py-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    transition: border-color .25s;
+    border-radius: var(--radius-lg);
+    overflow: hidden; margin-bottom: 18px;
+    transition: border-color .3s, box-shadow .3s;
+    position: relative;
 }
+.py-card::before {
+    content: '';
+    position: absolute; inset: 0; border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255,255,255,.012) 0%, transparent 50%);
+    pointer-events: none;
+}
+.py-card:hover { border-color: rgba(200,169,110,.14); }
+.py-card:focus-within {
+    border-color: var(--gold-border);
+    box-shadow: 0 0 0 1px var(--gold-border), 0 8px 40px rgba(0,0,0,.2);
+}
+
 .py-card-head {
     display: flex; align-items: center; gap: 14px;
-    padding: 20px 26px;
+    padding: 20px 24px;
     border-bottom: 1px solid var(--border);
+    position: relative;
+}
+.py-card-head::after {
+    content: '';
+    position: absolute; bottom: 0; left: 24px; right: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold-border), transparent);
+    opacity: .5;
 }
 .py-card-icon {
-    width: 40px; height: 40px; border-radius: 11px;
-    background: var(--gold-dim);
-    border: 1px solid var(--gold-border);
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--gold-dim); border: 1px solid var(--gold-border);
     display: flex; align-items: center; justify-content: center;
-    color: var(--gold); font-size: .95rem; flex-shrink: 0;
+    color: var(--gold); font-size: 1rem; flex-shrink: 0;
+    transition: background .25s, box-shadow .25s;
+}
+.py-card:focus-within .py-card-icon {
+    background: rgba(200,169,110,.12);
+    box-shadow: 0 0 12px rgba(200,169,110,.15);
 }
 .py-card-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem; font-weight: 700;
-    color: var(--text); margin: 0; line-height: 1;
+    font-family: var(--font-display);
+    font-size: 1.05rem; font-weight: 600;
+    color: var(--text); margin: 0; line-height: 1.1;
 }
 .py-card-subtitle {
-    font-size: .73rem; color: var(--muted); margin-top: 3px;
+    font-size: .7rem; color: var(--muted); margin-top: 4px; font-weight: 300;
 }
-.py-card-body { padding: 26px; }
+.py-card-step {
+    margin-left: auto;
+    font-size: .6rem; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); opacity: .45;
+    font-family: var(--font-body);
+}
+.py-card-body { padding: 24px; }
 
-/* ── Method Tabs ──────────────────────────────────────────── */
+/* ── Payment Method Tabs ──────────────────────────────────── */
 .py-methods {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 12px; margin-bottom: 24px;
 }
 .py-method {
-    background: rgba(255,255,255,.03);
-    border: 1px solid rgba(255,255,255,.09);
-    border-radius: 12px;
-    padding: 16px 12px 14px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color .2s, background .2s, box-shadow .2s;
-    user-select: none;
-    position: relative;
-    overflow: hidden;
+    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius-sm);
+    padding: 18px 12px 16px;
+    text-align: center; cursor: pointer;
+    transition: border-color .25s, background .25s, box-shadow .25s;
+    user-select: none; position: relative; overflow: hidden;
 }
 [data-theme="light"] .py-method {
-    background: rgba(0,0,0,.02);
-    border-color: rgba(0,0,0,.1);
+    background: rgba(0,0,0,.02); border-color: rgba(0,0,0,.1);
 }
 .py-method::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--gold-dim);
-    opacity: 0;
-    transition: opacity .2s;
+    content: ''; position: absolute; inset: 0;
+    background: var(--gold-dim); opacity: 0; transition: opacity .25s;
 }
 .py-method:hover::before { opacity: 1; }
 .py-method:hover { border-color: var(--gold-border); }
 .py-method.is-active {
     border-color: var(--gold);
-    box-shadow: 0 0 0 1px var(--gold-border), 0 4px 16px rgba(200,169,110,.12);
+    box-shadow: 0 0 0 1px var(--gold-border), 0 4px 20px rgba(200,169,110,.14);
 }
 .py-method.is-active::before { opacity: 1; }
+
+/* Checkmark tick */
 .py-method-check {
     position: absolute; top: 8px; right: 8px;
-    width: 16px; height: 16px; border-radius: 50%;
-    background: var(--gold); color: #0d0d0d;
-    font-size: .55rem;
+    width: 17px; height: 17px; border-radius: 50%;
+    background: var(--gold); color: #0d0a06;
+    font-size: .56rem;
     display: flex; align-items: center; justify-content: center;
     opacity: 0; transform: scale(0);
-    transition: opacity .2s, transform .25s cubic-bezier(.34,1.56,.64,1);
+    transition: opacity .2s, transform .25s var(--ease-spring);
 }
-.py-method.is-active .py-method-check {
-    opacity: 1; transform: scale(1);
-}
+.py-method.is-active .py-method-check { opacity: 1; transform: scale(1); }
+
 .py-method-icon {
     position: relative; z-index: 1;
-    font-size: 1.5rem; color: var(--muted);
-    display: block; margin-bottom: 8px;
+    font-size: 1.55rem; color: var(--muted);
+    display: block; margin-bottom: 9px;
     transition: color .2s;
 }
 .py-method.is-active .py-method-icon,
 .py-method:hover .py-method-icon { color: var(--gold); }
 .py-method-label {
     position: relative; z-index: 1;
-    font-size: .78rem; font-weight: 600;
-    color: var(--muted);
+    font-size: .76rem; font-weight: 600; color: var(--muted);
     transition: color .2s;
 }
 .py-method.is-active .py-method-label,
 .py-method:hover .py-method-label { color: var(--text); }
 
-/* ── Method Info Panels ───────────────────────────────────── */
+/* ── Method Panels ────────────────────────────────────────── */
 .py-method-panel { display: none; }
-.py-method-panel.is-show { display: block; }
+.py-method-panel.is-show {
+    display: block;
+    animation: pyFadeUp .25s var(--ease-out) both;
+}
 
-/* Bank info */
+/* Bank box */
 .py-bank-box {
-    background: rgba(255,255,255,.03);
-    border: 1px solid rgba(255,255,255,.09);
-    border-radius: 12px;
+    background: rgba(200,169,110,.04);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-sm);
     padding: 20px 22px;
+    position: relative; overflow: hidden;
 }
-[data-theme="light"] .py-bank-box {
-    background: rgba(0,0,0,.02);
-    border-color: rgba(0,0,0,.1);
+.py-bank-box::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--gold), var(--gold-light));
+    border-radius: 0 2px 2px 0;
 }
+[data-theme="light"] .py-bank-box { background: rgba(200,169,110,.04); }
+
 .py-bank-name {
-    font-size: .75rem; font-weight: 700;
-    letter-spacing: .08em; text-transform: uppercase;
+    font-size: .68rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
     color: var(--muted); margin-bottom: 10px;
 }
 .py-bank-num {
-    font-family: 'DM Mono', 'Courier New', monospace;
-    font-size: 1.3rem; font-weight: 500;
-    color: var(--gold-light);
-    letter-spacing: .12em;
-    line-height: 1;
+    font-family: var(--font-mono);
+    font-size: 1.35rem; font-weight: 500;
+    color: var(--gold-light); letter-spacing: .14em; line-height: 1;
 }
+[data-theme="light"] .py-bank-num { color: var(--gold); }
 .py-bank-holder {
-    font-size: .78rem; color: var(--muted);
-    margin-top: 5px;
+    font-size: .76rem; color: var(--muted); margin-top: 5px; font-weight: 300;
 }
 .py-copy-btn {
     display: inline-flex; align-items: center; gap: 6px;
     margin-top: 14px;
-    font-size: .73rem; font-weight: 700;
+    font-size: .71rem; font-weight: 700;
     color: var(--gold);
     background: var(--gold-dim);
     border: 1px solid var(--gold-border);
-    padding: 5px 14px; border-radius: 100px;
-    cursor: pointer;
-    transition: background .18s, transform .15s;
+    padding: 5px 14px; border-radius: 100px; cursor: pointer;
+    transition: background .2s, transform .18s var(--ease-spring);
+    font-family: var(--font-body);
 }
-.py-copy-btn:hover {
-    background: rgba(200,169,110,.2);
-    transform: translateY(-1px);
-}
+.py-copy-btn:hover { background: rgba(200,169,110,.14); transform: translateY(-1px); }
 .py-copy-btn:active { transform: none; }
 
-/* QRIS box */
+/* QRIS */
 .py-qris-box {
     display: flex; flex-direction: column; align-items: center;
-    padding: 24px;
-    background: rgba(255,255,255,.03);
-    border: 1px solid rgba(255,255,255,.09);
-    border-radius: 12px;
-    text-align: center;
-    gap: 14px;
+    padding: 28px 24px;
+    background: rgba(255,255,255,.02);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-align: center; gap: 14px;
 }
 .py-qris-box img {
     width: 100%; max-width: 200px;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--gold-border);
-    background: #fff;
-    padding: 8px;
+    background: #fff; padding: 8px;
 }
-.py-qris-hint { font-size: .78rem; color: var(--muted); line-height: 1.6; }
+.py-qris-hint { font-size: .78rem; color: var(--muted); line-height: 1.65; font-weight: 300; }
 
-/* Cash box */
+/* Cash */
 .py-cash-box {
     display: flex; gap: 14px; align-items: flex-start;
     padding: 18px 20px;
-    background: rgba(255,255,255,.03);
-    border: 1px solid rgba(255,255,255,.09);
-    border-radius: 12px;
+    background: rgba(76,175,130,.04);
+    border: 1px solid rgba(76,175,130,.18);
+    border-radius: var(--radius-sm);
 }
 .py-cash-icon {
     width: 44px; height: 44px; border-radius: 12px;
@@ -321,29 +381,31 @@
     display: flex; align-items: center; justify-content: center;
     color: var(--success); font-size: 1.2rem; flex-shrink: 0;
 }
-.py-cash-text { font-size: .83rem; color: var(--muted); line-height: 1.7; }
-.py-cash-text strong { color: var(--text); display: block; margin-bottom: 4px; font-size: .88rem; }
+.py-cash-text { font-size: .82rem; color: var(--muted); line-height: 1.7; font-weight: 300; }
+.py-cash-text strong { color: var(--text); display: block; margin-bottom: 4px; font-size: .87rem; font-weight: 600; }
 
 /* Empty state */
 .py-empty-state {
-    padding: 20px; text-align: center;
+    padding: 24px; text-align: center;
     font-size: .82rem; color: var(--muted);
 }
-.py-empty-state i { font-size: 2rem; color: var(--gold-border); display: block; margin-bottom: 8px; }
+.py-empty-state i { font-size: 2rem; color: var(--gold-border); display: block; margin-bottom: 8px; opacity: .5; }
 
 /* ── Upload Zone ──────────────────────────────────────────── */
 .py-upload-zone {
     border: 2px dashed rgba(255,255,255,.1);
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     padding: 44px 24px;
-    text-align: center;
-    cursor: pointer;
+    text-align: center; cursor: pointer;
     position: relative;
-    transition: border-color .2s, background .2s;
+    transition: border-color .25s, background .25s;
 }
 [data-theme="light"] .py-upload-zone { border-color: rgba(0,0,0,.12); }
 .py-upload-zone:hover,
-.py-upload-zone.is-drag { border-color: var(--gold-border); background: var(--gold-dim); }
+.py-upload-zone.is-drag {
+    border-color: var(--gold-border);
+    background: var(--gold-dim);
+}
 .py-upload-zone input[type="file"] {
     position: absolute; inset: 0;
     opacity: 0; cursor: pointer; width: 100%; height: 100%;
@@ -351,32 +413,28 @@
 .py-upload-cloud {
     font-size: 2.8rem; color: var(--gold-border);
     display: block; margin-bottom: 14px;
-    transition: color .2s, transform .2s;
+    transition: color .25s, transform .25s var(--ease-spring);
 }
 .py-upload-zone:hover .py-upload-cloud {
-    color: var(--gold); transform: translateY(-3px);
+    color: var(--gold); transform: translateY(-4px);
 }
 .py-upload-main {
-    font-size: .88rem; color: var(--muted);
-    margin-bottom: 5px;
+    font-size: .87rem; color: var(--muted); margin-bottom: 5px;
 }
-.py-upload-main strong { color: var(--gold); }
-.py-upload-hint { font-size: .73rem; color: var(--muted); opacity: .7; }
+.py-upload-main strong { color: var(--gold); font-weight: 600; }
+.py-upload-hint { font-size: .72rem; color: var(--muted); opacity: .6; }
 
 /* Preview */
 .py-preview {
-    display: none;
-    margin-top: 16px;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--gold-border);
+    display: none; margin-top: 16px;
+    border-radius: var(--radius-sm);
+    overflow: hidden; border: 1px solid var(--gold-border);
     position: relative;
 }
 .py-preview img {
     width: 100%; max-height: 280px;
     object-fit: contain;
-    background: rgba(0,0,0,.4);
-    display: block;
+    background: rgba(0,0,0,.4); display: block;
 }
 .py-preview-bar {
     display: flex; align-items: center; justify-content: space-between;
@@ -385,302 +443,258 @@
     backdrop-filter: blur(6px);
     border-top: 1px solid rgba(255,255,255,.06);
 }
+[data-theme="light"] .py-preview-bar { background: rgba(0,0,0,.06); }
 .py-preview-name {
-    font-size: .75rem; color: var(--muted);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    max-width: 200px;
+    font-size: .74rem; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
 }
-.py-preview-name strong { color: var(--text); display: block; font-size: .82rem; }
+.py-preview-name strong { color: var(--text); display: block; font-size: .8rem; }
 .py-preview-remove {
     display: flex; align-items: center; gap: 5px;
-    font-size: .73rem; color: var(--danger);
-    background: rgba(224,92,92,.1);
-    border: 1px solid rgba(224,92,92,.2);
+    font-size: .72rem; color: var(--danger);
+    background: rgba(224,92,92,.1); border: 1px solid rgba(224,92,92,.2);
     padding: 4px 10px; border-radius: 100px;
     cursor: pointer; transition: background .15s;
-    white-space: nowrap; flex-shrink: 0;
+    white-space: nowrap; flex-shrink: 0; font-family: var(--font-body);
 }
 .py-preview-remove:hover { background: rgba(224,92,92,.2); }
 
-/* Upload success state */
-.py-upload-success {
-    display: none;
-    align-items: center; gap: 10px;
-    padding: 12px 16px;
-    background: rgba(76,175,130,.08);
-    border: 1px solid rgba(76,175,130,.2);
-    border-radius: 10px;
-    margin-top: 10px;
+.py-err {
+    font-size: .72rem; color: var(--danger);
+    margin-top: 6px; display: flex; align-items: center; gap: 5px; font-weight: 500;
 }
-.py-upload-success i { color: var(--success); font-size: 1rem; flex-shrink: 0; }
-.py-upload-success span { font-size: .8rem; color: var(--muted); }
-
-/* Error msg */
-.py-err { font-size: .73rem; color: var(--danger); margin-top: 6px; display: flex; align-items: center; gap: 5px; }
-.py-err::before { content: '⚠'; }
+.py-err::before { content: '⚠'; font-size: .75rem; }
 
 /* ── Guide Steps ──────────────────────────────────────────── */
 .py-guide {
-    list-style: none;
-    padding: 0; margin: 0;
+    list-style: none; padding: 0; margin: 0;
     display: flex; flex-direction: column; gap: 0;
-    counter-reset: guide;
 }
 .py-guide-item {
     display: flex; align-items: flex-start; gap: 14px;
     padding: 12px 0;
     border-bottom: 1px solid var(--border);
-    counter-increment: guide;
 }
 .py-guide-item:last-child { border-bottom: none; padding-bottom: 0; }
 .py-guide-num {
     width: 26px; height: 26px; border-radius: 50%;
-    background: var(--gold-dim);
-    border: 1px solid var(--gold-border);
-    color: var(--gold);
-    font-size: .7rem; font-weight: 700;
+    background: var(--gold-dim); border: 1px solid var(--gold-border);
+    color: var(--gold); font-size: .68rem; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; margin-top: 1px;
 }
 .py-guide-text {
-    font-size: .83rem; color: var(--muted);
-    line-height: 1.6; flex: 1;
+    font-size: .82rem; color: var(--muted); line-height: 1.65; flex: 1; font-weight: 300;
 }
-.py-guide-text strong { color: var(--gold); }
+.py-guide-text strong { color: var(--gold); font-weight: 600; }
 
 /* ── Order Summary Sidebar ────────────────────────────────── */
 .py-summary {
     background: var(--card);
     border: 1px solid var(--gold-border);
-    border-radius: 16px;
-    overflow: hidden;
-    position: sticky;
-    top: 88px;
+    border-radius: var(--radius-lg);
+    overflow: hidden; position: sticky; top: 92px;
+    transition: box-shadow .3s;
+}
+.py-summary:hover {
+    box-shadow: 0 16px 60px rgba(0,0,0,.3), 0 0 0 1px var(--gold-border);
 }
 
-/* Hero */
 .py-sum-hero {
-    padding: 22px 20px 18px;
+    padding: 26px 22px 20px;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(160deg,
-        rgba(200,169,110,.07) 0%,
-        rgba(200,169,110,.02) 100%);
-    text-align: center;
-    position: relative;
+    background: linear-gradient(160deg, rgba(200,169,110,.08) 0%, rgba(200,169,110,.02) 100%);
+    text-align: center; position: relative;
 }
 .py-sum-hero::before {
     content: '';
     position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-    width: 60%; height: 1px;
+    width: 70%; height: 1px;
     background: linear-gradient(90deg, transparent, var(--gold-border), transparent);
 }
+
+/* Icon di hero summary */
+.py-sum-icon {
+    width: 50px; height: 50px; border-radius: 14px;
+    background: var(--gold-dim); border: 1px solid var(--gold-border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold); font-size: 1.2rem;
+    margin: 0 auto 14px;
+    box-shadow: 0 4px 20px rgba(200,169,110,.12);
+}
 .py-sum-eyebrow {
-    font-size: .62rem; font-weight: 700;
-    letter-spacing: .15em; text-transform: uppercase;
+    font-size: .6rem; font-weight: 700;
+    letter-spacing: .18em; text-transform: uppercase;
     color: var(--muted); margin-bottom: 8px;
 }
 .py-sum-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem; font-weight: 700;
-    color: var(--text); line-height: 1.3; margin-bottom: 6px;
+    font-family: var(--font-display);
+    font-size: 1.2rem; font-weight: 600;
+    color: var(--text); line-height: 1.25; margin-bottom: 8px;
 }
 .py-sum-cat {
     display: inline-flex; align-items: center; gap: 5px;
-    font-size: .68rem; font-weight: 600;
+    font-size: .65rem; font-weight: 600;
     color: var(--gold); background: var(--gold-dim);
     border: 1px solid var(--gold-border);
-    padding: 3px 10px; border-radius: 100px;
+    padding: 3px 11px; border-radius: 100px;
 }
 
-/* Rows */
-.py-sum-body { padding: 16px 18px; }
+.py-sum-body { padding: 16px 18px 20px; }
 .py-sum-row {
     display: flex; justify-content: space-between; align-items: flex-start;
     gap: 10px; padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,.05);
-    font-size: .81rem;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    font-size: .8rem;
 }
 [data-theme="light"] .py-sum-row { border-bottom-color: rgba(0,0,0,.05); }
 .py-sum-row:last-of-type { border-bottom: none; }
 .py-sum-key {
     display: flex; align-items: center; gap: 7px;
-    color: var(--muted); flex-shrink: 0;
+    color: var(--muted); flex-shrink: 0; font-weight: 400;
 }
-.py-sum-key i { color: var(--gold); font-size: .82rem; width: 13px; text-align: center; }
-.py-sum-val { color: var(--text); font-weight: 500; text-align: right; max-width: 130px; }
+.py-sum-key i { color: var(--gold); font-size: .8rem; width: 13px; text-align: center; opacity: .85; }
+.py-sum-val { color: var(--text); font-weight: 500; text-align: right; max-width: 140px; }
 
-/* Status badge */
+/* Status badges */
 .py-status {
     display: inline-flex; align-items: center; gap: 5px;
-    font-size: .68rem; font-weight: 700;
+    font-size: .63rem; font-weight: 700;
     padding: 3px 9px; border-radius: 100px;
-    text-transform: uppercase; letter-spacing: .05em;
+    text-transform: uppercase; letter-spacing: .06em;
 }
 .py-status-pending {
-    background: rgba(224,169,53,.12);
-    border: 1px solid rgba(224,169,53,.3);
+    background: rgba(224,169,53,.1);
+    border: 1px solid rgba(224,169,53,.25);
     color: #e0a935;
 }
 .py-status-confirmed {
-    background: rgba(76,175,130,.12);
-    border: 1px solid rgba(76,175,130,.3);
+    background: rgba(76,175,130,.1);
+    border: 1px solid rgba(76,175,130,.25);
     color: var(--success);
 }
 
-/* Divider */
 .py-sum-divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--gold-border), transparent);
-    margin: 4px 0 14px;
+    margin: 8px 0 14px;
 }
 
-/* Total */
 .py-sum-total {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 16px;
-    background: var(--gold-dim);
-    border: 1px solid var(--gold-border);
-    border-radius: 11px; margin-bottom: 14px;
-}
-.py-sum-total-label {
-    font-size: .67rem; font-weight: 700;
-    letter-spacing: .12em; text-transform: uppercase;
-    color: var(--muted);
-}
-.py-sum-total-price {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.45rem; font-weight: 800;
-    color: var(--gold-light); letter-spacing: -.02em; line-height: 1;
-}
-
-/* CTA */
-.py-submit {
-    display: flex; align-items: center; justify-content: center; gap: 9px;
-    width: 100%; padding: 14px 20px;
-    font-size: .8rem; font-weight: 700;
-    letter-spacing: .1em; text-transform: uppercase;
-    color: #0d0d0d; background: var(--gold);
-    border: none; border-radius: 11px; cursor: pointer;
-    transition: background .2s, transform .18s, box-shadow .2s;
+    padding: 15px 16px;
+    background: var(--gold-dim); border: 1px solid var(--gold-border);
+    border-radius: var(--radius-sm); margin-bottom: 16px;
     position: relative; overflow: hidden;
 }
-.py-submit::before {
+.py-sum-total::before {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,.14) 0%, transparent 55%);
+    background: linear-gradient(135deg, rgba(200,169,110,.06) 0%, transparent 60%);
+    pointer-events: none;
+}
+.py-sum-total-label {
+    font-size: .62rem; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+}
+.py-sum-total-price {
+    font-family: var(--font-display);
+    font-size: 1.55rem; font-weight: 600;
+    color: var(--gold-light); letter-spacing: -.01em; line-height: 1;
+}
+[data-theme="light"] .py-sum-total-price { color: var(--gold); }
+
+/* Submit CTA */
+.py-submit {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 15px 24px;
+    font-size: .78rem; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: #0d0a06;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    border: none; border-radius: var(--radius-sm); cursor: pointer;
+    transition: transform .22s var(--ease-spring), box-shadow .22s, opacity .2s;
+    position: relative; overflow: hidden; font-family: var(--font-body);
+}
+.py-submit::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.18) 0%, transparent 55%);
     pointer-events: none;
 }
 .py-submit:hover {
-    background: var(--gold-light);
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(200,169,110,.3);
+    box-shadow: 0 10px 36px rgba(200,169,110,.35), 0 4px 12px rgba(0,0,0,.2);
 }
-.py-submit:active { transform: none; box-shadow: none; }
-.py-submit:disabled { opacity: .6; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+.py-submit:active { transform: translateY(0) scale(.98); }
+.py-submit:disabled { opacity: .65; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-/* Secure + back */
 .py-secure {
-    display: flex; align-items: center; justify-content: center; gap: 5px;
-    font-size: .7rem; color: var(--muted); margin-top: 11px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-size: .68rem; color: var(--muted); margin-top: 12px;
+    font-weight: 400; letter-spacing: .03em;
 }
-.py-secure i { color: var(--gold); font-size: .75rem; }
+.py-secure i { color: var(--gold); font-size: .76rem; opacity: .85; }
+
 .py-back-link {
     display: flex; align-items: center; justify-content: center; gap: 5px;
-    margin-top: 12px; font-size: .74rem;
+    margin-top: 14px; font-size: .73rem;
     color: var(--muted); text-decoration: none;
-    transition: color .18s;
+    transition: color .2s; font-weight: 400;
 }
 .py-back-link:hover { color: var(--gold); }
+
+/* ── Animations ───────────────────────────────────────────── */
+@keyframes pyFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.py-card[data-aos] {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity .55s var(--ease-out), transform .55s var(--ease-out), border-color .3s, box-shadow .3s;
+}
+.py-card[data-aos].aos-animate { opacity: 1; transform: translateY(0); }
 
 /* ══════════════════════════════════════════════════════════════
    RESPONSIVE — Tablet ≤ 991px
 ══════════════════════════════════════════════════════════════ */
 @media (max-width: 991.98px) {
-    .py-page    { padding: 88px 0 110px; }
+    .py-page    { padding: 88px 0 60px; }
     .py-summary { position: static; margin-top: 4px; }
-    .py-sum-hero { padding: 16px 18px 14px; }
-    .py-sum-body { padding: 14px 16px; }
-    .py-title   { font-size: clamp(1.4rem, 4vw, 1.8rem); }
-
-    /* Hide desktop submit in summary, show sticky */
-    .py-sum-body .py-submit   { display: none; }
-    .py-sum-body .py-secure   { display: none; }
-
-    /* Sticky CTA bar */
-    .py-sticky-cta {
-        position: fixed;
-        bottom: 0; left: 0; right: 0; z-index: 900;
-        background: var(--card);
-        border-top: 1px solid var(--gold-border);
-        padding: 12px 16px;
-        padding-bottom: calc(12px + env(safe-area-inset-bottom));
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        display: flex; align-items: center; gap: 12px;
-        animation: pySlideUp .3s cubic-bezier(.16,1,.3,1) both;
-    }
-    @keyframes pySlideUp {
-        from { transform: translateY(100%); opacity: 0; }
-        to   { transform: translateY(0); opacity: 1; }
-    }
-    .py-sticky-price { display: flex; flex-direction: column; flex-shrink: 0; }
-    .py-sticky-price-label {
-        font-size: .58rem; font-weight: 700; letter-spacing: .1em;
-        text-transform: uppercase; color: var(--muted); line-height: 1; margin-bottom: 2px;
-    }
-    .py-sticky-price-val {
-        font-family: 'Playfair Display', serif;
-        font-size: 1rem; font-weight: 800; color: var(--gold-light); line-height: 1;
-    }
-    .py-sticky-btn {
-        flex: 1;
-        display: flex; align-items: center; justify-content: center; gap: 8px;
-        padding: 13px 18px;
-        font-size: .78rem; font-weight: 700;
-        letter-spacing: .08em; text-transform: uppercase;
-        color: #0d0d0d; background: var(--gold);
-        border: none; border-radius: 11px; cursor: pointer;
-        transition: background .2s, transform .15s;
-        position: relative; overflow: hidden;
-    }
-    .py-sticky-btn::before {
-        content: '';
-        position: absolute; inset: 0;
-        background: linear-gradient(135deg, rgba(255,255,255,.12) 0%, transparent 60%);
-        pointer-events: none;
-    }
-    .py-sticky-btn:active { background: var(--gold-light); transform: scale(.98); }
-    .py-sticky-btn:disabled { opacity: .65; cursor: not-allowed; transform: none !important; }
+    .py-sum-hero { padding: 20px 20px 16px; }
+    .py-sum-body { padding: 14px 18px 18px; }
+    .py-title   { font-size: clamp(1.5rem, 4.5vw, 2rem); }
 }
-@media (min-width: 992px) {
-    .py-sticky-cta { display: none; }
+
+/* Desktop: sembunyikan sticky bar */
+@media (min-width: 0px) {
+    .py-sticky-cta { display: none !important; }
 }
 
 /* ── Mobile ≤ 767px ───────────────────────────────────────── */
 @media (max-width: 767.98px) {
-    .py-page    { padding: 76px 0 100px; }
-    .py-steps   { margin-bottom: 28px; }
-    .py-step-num { width: 28px; height: 28px; font-size: .7rem; }
+    .py-page    { padding: 78px 0 50px; }
+    .py-steps   { margin-bottom: 30px; }
+    .py-step-num { width: 30px; height: 30px; font-size: .68rem; }
     .py-step-track { margin: 0 8px; }
-    .py-header  { margin-bottom: 20px; }
-    .py-eyebrow { font-size: .6rem; padding: 4px 11px; }
-    .py-title   { font-size: 1.45rem; }
-    .py-desc    { font-size: .82rem; }
+    .py-header  { margin-bottom: 24px; }
+    .py-eyebrow { font-size: .6rem; padding: 4px 12px; }
+    .py-title   { font-size: 1.55rem; margin-bottom: 8px; }
+    .py-desc    { font-size: .8rem; }
 
-    .py-card    { border-radius: 12px; margin-bottom: 14px; }
-    .py-card-head { padding: 14px 16px; gap: 10px; }
-    .py-card-icon { width: 34px; height: 34px; border-radius: 9px; font-size: .85rem; }
-    .py-card-title  { font-size: .92rem; }
-    .py-card-subtitle { font-size: .68rem; }
-    .py-card-body { padding: 16px; }
+    .py-card    { border-radius: var(--radius-md); margin-bottom: 14px; }
+    .py-card-head { padding: 16px 18px; gap: 11px; }
+    .py-card-icon { width: 36px; height: 36px; border-radius: 10px; font-size: .9rem; }
+    .py-card-title  { font-size: .95rem; }
+    .py-card-subtitle { font-size: .67rem; }
+    .py-card-body { padding: 18px; }
+    .py-card-step { display: none; }
 
-    /* Methods: 3-col stays, but smaller */
     .py-methods { gap: 8px; }
-    .py-method  { padding: 13px 8px 11px; border-radius: 10px; }
-    .py-method-icon  { font-size: 1.25rem; margin-bottom: 6px; }
+    .py-method  { padding: 14px 8px 12px; border-radius: var(--radius-sm); }
+    .py-method-icon  { font-size: 1.3rem; margin-bottom: 6px; }
     .py-method-label { font-size: .72rem; }
 
-    .py-upload-zone { padding: 30px 16px; border-radius: 11px; }
+    .py-upload-zone { padding: 32px 16px; border-radius: var(--radius-sm); }
     .py-upload-cloud { font-size: 2.2rem; margin-bottom: 10px; }
     .py-upload-main { font-size: .82rem; }
 
@@ -688,30 +702,27 @@
     .py-guide-item { gap: 10px; padding: 10px 0; }
     .py-guide-text { font-size: .8rem; }
 
-    .py-sum-total-price { font-size: 1.3rem; }
-    .py-sum-name { font-size: 1rem; }
+    .py-sum-total-price { font-size: 1.4rem; }
+    .py-sum-name { font-size: 1.05rem; }
+    .py-sum-icon { width: 44px; height: 44px; border-radius: 12px; font-size: 1rem; }
+    .py-summary { border-radius: var(--radius-md); }
 }
 
 /* ── Small Mobile ≤ 575px ─────────────────────────────────── */
 @media (max-width: 575.98px) {
-    .py-page    { padding: 72px 0 96px; }
+    .py-page    { padding: 72px 0 40px; }
     .py-step-label { display: none !important; }
-    .py-step-num   { width: 26px; height: 26px; font-size: .68rem; }
-    .py-steps  { margin-bottom: 22px; }
-
-    .py-card-head { padding: 12px 14px; }
-    .py-card-body { padding: 14px; }
-    .py-card-icon { width: 30px; height: 30px; font-size: .8rem; }
-
-    /* Methods: 2-col on small */
-    .py-methods { grid-template-columns: 1fr 1fr 1fr; }
-    .py-method-label { font-size: .65rem; }
-
+    .py-step-num   { width: 28px; height: 28px; font-size: .67rem; }
+    .py-steps  { margin-bottom: 26px; }
+    .py-card-head { padding: 13px 15px; }
+    .py-card-body { padding: 15px; }
+    .py-card-icon { width: 32px; height: 32px; font-size: .82rem; }
     .py-upload-zone { padding: 26px 14px; }
     .py-preview-name { max-width: 130px; }
-
-    .py-sum-total-price { font-size: 1.2rem; }
+    .py-sum-total-price { font-size: 1.3rem; }
     .py-bank-num { font-size: 1rem; }
+    .py-methods { gap: 7px; }
+    .py-method-label { font-size: .65rem; }
 }
 </style>
 @endpush
@@ -719,24 +730,15 @@
 @section('content')
 <main id="main">
 
-    {{-- ── Breadcrumb ──────────────────────────────────────── --}}
-    <div class="breadcrumbs d-flex align-items-center"
-         style="background-image: url('{{ asset('root/assets/img/breadcrumbs-bg.jpg') }}');">
-        <div class="container position-relative d-flex flex-column align-items-center text-center" data-aos="fade">
-            <h2>Pembayaran</h2>
-            <ol>
-                <li><a href="{{ route('home') }}">Beranda</a></li>
-                <li><a href="{{ route('customer.orders') }}">Pesanan Saya</a></li>
-                <li>Pembayaran</li>
-            </ol>
-        </div>
-    </div>
+    {{-- Ambient orbs --}}
+    <div class="py-orb py-orb-1" aria-hidden="true"></div>
+    <div class="py-orb py-orb-2" aria-hidden="true"></div>
 
     <section class="py-page">
         <div class="container">
 
             {{-- ── Steps ──────────────────────────────────── --}}
-            <div class="py-steps" data-aos="fade-up" data-aos-duration="600">
+            <div class="py-steps" data-aos="fade-up" data-aos-duration="700">
                 <div class="py-step is-done">
                     <div class="py-step-num"><i class="bi bi-check"></i></div>
                     <span class="py-step-label d-none d-sm-block">Isi Data</span>
@@ -754,12 +756,12 @@
             </div>
 
             {{-- ── Page Header ─────────────────────────────── --}}
-            <div class="py-header" data-aos="fade-up" data-aos-delay="50">
+            <div class="py-header" data-aos="fade-up" data-aos-delay="60">
                 <div class="py-eyebrow">
                     <i class="bi bi-credit-card"></i>
                     Pembayaran
                 </div>
-                <h1 class="py-title">Upload Bukti Pembayaran</h1>
+                <h1 class="py-title">Upload Bukti <em>Pembayaran</em></h1>
                 <p class="py-desc">
                     Transfer ke rekening di bawah, lalu upload bukti transfer.
                     Admin akan memverifikasi dalam 1×24 jam.
@@ -783,9 +785,9 @@
             <div class="py-alert is-error" data-aos="fade-down">
                 <i class="bi bi-exclamation-circle-fill py-alert-icon"></i>
                 <div>
-                    <strong style="display:block; margin-bottom:4px;">Periksa kembali form kamu:</strong>
+                    <strong style="display:block; margin-bottom:5px; font-weight:600;">Periksa kembali form kamu:</strong>
                     @foreach($errors->all() as $err)
-                        <div style="opacity:.85;">· {{ $err }}</div>
+                        <div style="opacity:.8; margin-top:2px;">· {{ $err }}</div>
                     @endforeach
                 </div>
             </div>
@@ -797,8 +799,8 @@
                   id="payment-form"
                   novalidate>
                 @csrf
-                <input type="hidden" name="order_id"        value="{{ $order->id }}">
-                <input type="hidden" name="payment_method"  id="py_method_input" value="transfer">
+                <input type="hidden" name="order_id"       value="{{ $order->id }}">
+                <input type="hidden" name="payment_method" id="py_method_input" value="transfer">
 
                 <div class="row g-4 align-items-start">
 
@@ -806,19 +808,17 @@
                     <div class="col-lg-8">
 
                         {{-- 1 · Metode Pembayaran --}}
-                        <div class="py-card" data-aos="fade-up" data-aos-delay="80">
+                        <div class="py-card" data-aos="fade-up" data-aos-delay="80" data-aos-duration="650">
                             <div class="py-card-head">
-                                <div class="py-card-icon">
-                                    <i class="bi bi-wallet2"></i>
-                                </div>
+                                <div class="py-card-icon"><i class="bi bi-wallet2"></i></div>
                                 <div>
                                     <div class="py-card-title">Metode Pembayaran</div>
                                     <div class="py-card-subtitle">Pilih cara transfer yang kamu inginkan</div>
                                 </div>
+                                <div class="py-card-step">01 / 03</div>
                             </div>
                             <div class="py-card-body">
 
-                                {{-- Method tabs --}}
                                 <div class="py-methods">
                                     <div class="py-method is-active" data-method="transfer" onclick="pySelectMethod(this)">
                                         <div class="py-method-check"><i class="bi bi-check"></i></div>
@@ -861,9 +861,8 @@
                                 <div id="panel-qris" class="py-method-panel">
                                     @if($web->site_qris && $web->site_qris !== 'site_qris.png')
                                     <div class="py-qris-box">
-                                        <div style="font-size:.75rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);">Scan QRIS Berikut</div>
-                                        <img src="{{ asset('storage/images/default/' . $web->site_qris) }}"
-                                             alt="QRIS Telegrad">
+                                        <div style="font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">Scan QRIS Berikut</div>
+                                        <img src="{{ asset('storage/images/default/' . $web->site_qris) }}" alt="QRIS Telegrad">
                                         <p class="py-qris-hint">
                                             Screenshot atau scan QR di atas menggunakan app pembayaran, lalu upload bukti di bawah.
                                         </p>
@@ -893,15 +892,14 @@
                         </div>
 
                         {{-- 2 · Upload Bukti --}}
-                        <div class="py-card" data-aos="fade-up" data-aos-delay="120">
+                        <div class="py-card" data-aos="fade-up" data-aos-delay="130" data-aos-duration="650">
                             <div class="py-card-head">
-                                <div class="py-card-icon">
-                                    <i class="bi bi-cloud-arrow-up"></i>
-                                </div>
+                                <div class="py-card-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
                                 <div>
                                     <div class="py-card-title">Bukti Pembayaran</div>
                                     <div class="py-card-subtitle">Upload screenshot atau foto transfer kamu</div>
                                 </div>
+                                <div class="py-card-step">02 / 03</div>
                             </div>
                             <div class="py-card-body">
 
@@ -913,12 +911,11 @@
                                            onchange="pyPreviewProof(event)">
                                     <i class="bi bi-cloud-arrow-up py-upload-cloud"></i>
                                     <div class="py-upload-main">
-                                        <strong>Klik untuk pilih file</strong> atau drag & drop di sini
+                                        <strong>Klik untuk pilih file</strong> atau drag &amp; drop di sini
                                     </div>
                                     <div class="py-upload-hint">JPG, JPEG, PNG &middot; Maks. 2MB</div>
                                 </div>
 
-                                {{-- Preview --}}
                                 <div class="py-preview" id="py-preview">
                                     <img id="py-preview-img" src="" alt="Preview bukti pembayaran">
                                     <div class="py-preview-bar">
@@ -940,15 +937,14 @@
                         </div>
 
                         {{-- 3 · Panduan --}}
-                        <div class="py-card" data-aos="fade-up" data-aos-delay="160">
+                        <div class="py-card" data-aos="fade-up" data-aos-delay="180" data-aos-duration="650">
                             <div class="py-card-head">
-                                <div class="py-card-icon">
-                                    <i class="bi bi-info-circle"></i>
-                                </div>
+                                <div class="py-card-icon"><i class="bi bi-info-circle-fill"></i></div>
                                 <div>
                                     <div class="py-card-title">Panduan Pembayaran</div>
                                     <div class="py-card-subtitle">Ikuti langkah berikut dengan benar</div>
                                 </div>
+                                <div class="py-card-step">03 / 03</div>
                             </div>
                             <div class="py-card-body">
                                 <ol class="py-guide">
@@ -980,15 +976,18 @@
                     {{-- end col-lg-8 --}}
 
                     {{-- ═══════ RIGHT: Summary ═══════ --}}
-                    <div class="col-lg-4" data-aos="fade-left" data-aos-delay="100">
+                    <div class="col-lg-4" data-aos="fade-left" data-aos-delay="120" data-aos-duration="700">
                         <div class="py-summary">
 
                             <div class="py-sum-hero">
+                                <div class="py-sum-icon">
+                                    <i class="bi bi-receipt"></i>
+                                </div>
                                 <div class="py-sum-eyebrow">Ringkasan Pesanan</div>
                                 <div class="py-sum-name">{{ $order->package->name ?? '-' }}</div>
                                 @if($order->package->category ?? null)
                                     <div class="py-sum-cat">
-                                        <i class="bi bi-tag"></i>
+                                        <i class="bi bi-tag-fill"></i>
                                         {{ $order->package->category->name }}
                                     </div>
                                 @endif
@@ -1011,15 +1010,15 @@
                                     </span>
                                 </div>
                                 <div class="py-sum-row">
-                                    <span class="py-sum-key"><i class="bi bi-geo-alt"></i> Lokasi</span>
+                                    <span class="py-sum-key"><i class="bi bi-geo-alt-fill"></i> Lokasi</span>
                                     <span class="py-sum-val">{{ $order->location ?? '-' }}</span>
                                 </div>
                                 <div class="py-sum-row">
-                                    <span class="py-sum-key"><i class="bi bi-clock-history"></i> Durasi</span>
+                                    <span class="py-sum-key"><i class="bi bi-hourglass-split"></i> Durasi</span>
                                     <span class="py-sum-val">{{ $order->package->duration ?? '-' }} menit</span>
                                 </div>
                                 <div class="py-sum-row">
-                                    <span class="py-sum-key"><i class="bi bi-flag"></i> Status</span>
+                                    <span class="py-sum-key"><i class="bi bi-flag-fill"></i> Status</span>
                                     <span class="py-sum-val">
                                         <span class="py-status py-status-pending">
                                             <i class="bi bi-hourglass-split"></i> Menunggu
@@ -1037,13 +1036,13 @@
                                 </div>
 
                                 <button type="submit" class="py-submit" id="py-submit-btn">
-                                    <i class="bi bi-send-check"></i>
+                                    <i class="bi bi-send-check-fill"></i>
                                     Kirim Pembayaran
                                 </button>
 
                                 <div class="py-secure">
                                     <i class="bi bi-shield-lock-fill"></i>
-                                    Data kamu aman & terenkripsi
+                                    Data kamu aman &amp; terenkripsi
                                 </div>
 
                                 <a href="{{ route('customer.orders') }}" class="py-back-link">
@@ -1058,8 +1057,8 @@
                 {{-- end row --}}
             </form>
 
-            {{-- ── Sticky CTA bar — mobile only ── --}}
-            <div class="py-sticky-cta">
+            {{-- Sticky CTA — disabled, tombol ada di summary card --}}
+            <div class="py-sticky-cta" style="display:none !important;">
                 <div class="py-sticky-price">
                     <div class="py-sticky-price-label">Total</div>
                     <div class="py-sticky-price-val">
@@ -1067,7 +1066,7 @@
                     </div>
                 </div>
                 <button type="submit" form="payment-form" class="py-sticky-btn" id="py-sticky-btn">
-                    <i class="bi bi-send-check"></i>
+                    <i class="bi bi-send-check-fill"></i>
                     Kirim Pembayaran
                 </button>
             </div>
@@ -1083,43 +1082,30 @@
 (function () {
     'use strict';
 
-    // ── Method selection ────────────────────────────────────────
+    /* ── Method selection ──────────────────────────────────── */
     window.pySelectMethod = function (el) {
         document.querySelectorAll('.py-method').forEach(m => m.classList.remove('is-active'));
         el.classList.add('is-active');
-
-        const method = el.dataset.method;
-        document.getElementById('py_method_input').value = method;
-
+        document.getElementById('py_method_input').value = el.dataset.method;
         document.querySelectorAll('.py-method-panel').forEach(p => p.classList.remove('is-show'));
-        const panel = document.getElementById('panel-' + method);
-        if (panel) {
-            panel.classList.add('is-show');
-            panel.style.animation = 'none';
-            requestAnimationFrame(() => {
-                panel.style.animation = 'pyAlertIn .25s ease both';
-            });
-        }
+        const panel = document.getElementById('panel-' + el.dataset.method);
+        if (panel) panel.classList.add('is-show');
     };
 
-    // ── Preview proof ───────────────────────────────────────────
+    /* ── Preview proof ─────────────────────────────────────── */
     window.pyPreviewProof = function (event) {
         const file = event.target.files[0];
         if (!file) return;
-
-        // Size check (2MB)
         if (file.size > 2 * 1024 * 1024) {
             alert('Ukuran file melebihi 2MB. Silakan pilih file yang lebih kecil.');
             event.target.value = '';
             return;
         }
-
         const reader = new FileReader();
         reader.onload = e => {
             document.getElementById('py-preview-img').src = e.target.result;
             document.getElementById('py-preview-filename').textContent = file.name;
-            document.getElementById('py-preview-size').textContent =
-                '(' + (file.size / 1024).toFixed(0) + ' KB)';
+            document.getElementById('py-preview-size').textContent = '(' + (file.size / 1024).toFixed(0) + ' KB)';
             document.getElementById('py-preview').style.display = 'block';
             document.getElementById('py-upload-zone').style.display = 'none';
         };
@@ -1132,21 +1118,18 @@
         document.getElementById('py-upload-zone').style.display = 'block';
     };
 
-    // ── Copy rekening ───────────────────────────────────────────
+    /* ── Copy rekening ─────────────────────────────────────── */
     window.pyCopyRek = function () {
         const num = document.getElementById('rek-number')?.textContent?.replace(/\s/g, '') ?? '';
         if (!num) return;
         navigator.clipboard.writeText(num).then(() => {
-            const icon  = document.getElementById('copy-icon');
-            const label = document.getElementById('copy-label');
-            icon.className  = 'bi bi-check2';
-            label.textContent = 'Tersalin!';
+            document.getElementById('copy-icon').className  = 'bi bi-check2';
+            document.getElementById('copy-label').textContent = 'Tersalin!';
             setTimeout(() => {
-                icon.className  = 'bi bi-clipboard';
-                label.textContent = 'Salin Nomor Rekening';
+                document.getElementById('copy-icon').className  = 'bi bi-clipboard';
+                document.getElementById('copy-label').textContent = 'Salin Nomor Rekening';
             }, 2200);
         }).catch(() => {
-            // Fallback for older browsers
             const ta = document.createElement('textarea');
             ta.value = num; ta.style.position = 'fixed'; ta.style.opacity = '0';
             document.body.appendChild(ta); ta.focus(); ta.select();
@@ -1155,7 +1138,7 @@
         });
     };
 
-    // ── Drag & drop ─────────────────────────────────────────────
+    /* ── Drag & drop ───────────────────────────────────────── */
     const zone = document.getElementById('py-upload-zone');
     if (zone) {
         zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('is-drag'); });
@@ -1171,15 +1154,24 @@
         });
     }
 
-    // ── Prevent double submit — sync both buttons ───────────────
-    const loadingHTML = `<span class="spinner-border spinner-border-sm" style="width:.85rem;height:.85rem;border-width:2px;" role="status" aria-hidden="true"></span> Mengirim...`;
-
+    /* ── Prevent double submit ─────────────────────────────── */
+    const loadingHTML = `<span class="spinner-border spinner-border-sm" style="width:.85rem;height:.85rem;border-width:2px;" role="status" aria-hidden="true"></span>&nbsp; Mengirim...`;
     document.getElementById('payment-form')?.addEventListener('submit', function () {
-        ['py-submit-btn', 'py-sticky-btn'].forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) { btn.disabled = true; btn.innerHTML = loadingHTML; }
-        });
+        const btn = document.getElementById('py-submit-btn');
+        if (btn) { btn.disabled = true; btn.innerHTML = loadingHTML; }
     });
+
+    /* ── Card entrance on scroll ───────────────────────────── */
+    if ('IntersectionObserver' in window) {
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) { e.target.classList.add('aos-animate'); obs.unobserve(e.target); }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.py-card[data-aos]').forEach(c => obs.observe(c));
+    } else {
+        document.querySelectorAll('.py-card[data-aos]').forEach(c => c.classList.add('aos-animate'));
+    }
 
 })();
 </script>
